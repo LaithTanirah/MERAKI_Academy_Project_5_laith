@@ -1,7 +1,7 @@
 import express, { Application } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-
+import "./src/models/connectDB";
 
 dotenv.config();
 
@@ -13,7 +13,6 @@ app.use(cors());
 app.use(express.json());
 
 // API Routes
-
 
 // Default route
 app.get("/", (req, res) => {
