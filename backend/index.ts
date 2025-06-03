@@ -1,19 +1,21 @@
 import express, { Application } from "express";
-import dotenv from "dotenv";
 import cors from "cors";
-import "./src/models/connectDB";
-
+import dotenv from "dotenv";
 dotenv.config();
+import "./src/models/connectDB";
 
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
+
+// Import Routers
+import productRoutes from "./src/routes/product";
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 
 // API Routes
-
+app.use("/products", productRoutes);
 // Default route
 app.get("/", (req, res) => {
   res.send("API is running...");
