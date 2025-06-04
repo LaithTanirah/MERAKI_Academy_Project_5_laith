@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 import "./src/models/connectDB";
+import authRoutes from "./src/routes/auth";
 
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
@@ -16,6 +17,8 @@ app.use(express.json());
 
 // API Routes
 app.use("/products", productRoutes);
+app.use("/auth", authRoutes);
+
 // Default route
 app.get("/", (req, res) => {
   res.send("API is running...");

@@ -14,6 +14,8 @@ CREATE TABLE "locations" (
   "location" Point
 );
 
+
+
 CREATE TABLE "category" (
   "category_id" SERIAL PRIMARY KEY,
   "category_name" varchar,
