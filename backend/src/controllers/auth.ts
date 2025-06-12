@@ -1,11 +1,14 @@
+// controllers/auth.ts
 import { Request, Response } from "express";
 import pool from "../models/connectDB";
 import bcrypt from "bcryptjs";
 import Jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { error } from "console";
 
 dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -14,75 +17,72 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     //Check that required fields exist
     if (!first_name || !last_name || !email || !password) {
-      res.status(400).json({
-        error: "please fill Requsted field ",
-      });
+      res.status(400).json({ error: "please fill all required fields" });
       return;
     }
 
     //Check email already exist ? if its not !
-    const checkUserEmail = "SELECT * FROM uesrs WHERE email = $1";
-    const userExistResult = await pool.query(checkUserEmail, [email]);
-
-    if (userExistResult.rows.length > 0) {
-      // if we found emaild used in same email
-      res.status(400).json({ error: "Email user Before " });
+    const { rows: existing } = await pool.query(
+      `SELECT 1 FROM users WHERE email = $1`,
+      [email]
+    );
+    if (existing.length) {
+      res.status(400).json({ error: "Email already in use" });
       return;
     }
 
     // create bcrypt.js
-    const salt = bcrypt.genSaltSync();
-
+    const salt = bcrypt.genSaltSync(10);
     // split the hash
-    const hashedPassword = bcrypt.hashSync(password, salt);
+    const hashed = bcrypt.hashSync(password, salt);
 
     // inser newUser
-    const insertUser = `
-    INSERT INTO uesrs (first_name, last_name, email, password, "phoneNumber")
-    VALUES ($1,$2,$3,$4,$5)
-    RETURNING user_id, first_name, last_name, email
-  `;
-
-    const values = [
-      first_name,
-      last_name,
-      email,
-      hashedPassword,
-      phone_number || null,
-    ];
-
-    const newUserResult = await pool.query(insertUser, values);
-    const newUser = newUserResult.rows[0];
+    const { rows: userRows } = await pool.query(
+      `
+      INSERT INTO users (first_name, last_name, email, password, phone_number)
+      VALUES ($1,$2,$3,$4,$5)
+      RETURNING id, first_name, last_name, email
+      `,
+      [first_name, last_name, email, hashed, phone_number || null]
+    );
+    const user = userRows[0];
 
     // create jwt token after register
-    const jwtSecret: string = process.env.JWT_SECRET || "";
-    const expiresIn: string = process.env.JWT_EXPIRES_IN || "1h";
-
-    if (!jwtSecret) {
-      res.status(500).json({ error: "JWT_SECRET UNDEFINED" });
-      return;
-    }
-
-    const token = Jwt.sign({ userId: newUser.user_id }, jwtSecret, {
-      expiresIn: expiresIn,
+    const token = Jwt.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN,
     });
 
     // RETURN SUCCESS DATA WITH OUT PASSWORD
+    // also create an active cart for this user
+    await pool.query(
+      `
+      INSERT INTO carts (user_id, status, is_deleted, created_at, updated_at)
+      VALUES ($1, 'ACTIVE', false, NOW(), NOW())
+      `,
+      [user.id]
+    );
+
+    // fetch the new cartId
+    const { rows: cartRows } = await pool.query(
+      `SELECT id FROM carts WHERE user_id = $1 AND status = 'ACTIVE' LIMIT 1`,
+      [user.id]
+    );
+    const cartId = cartRows[0]?.id ?? null;
+
     res.status(201).json({
-      message: "register successfully ",
+      message: "Registered successfully",
       user: {
-        user_id: newUser.user_id,
-        first_name: newUser.first_name,
-        last_name: newUser.last_name,
-        email: newUser.email,
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
       },
+      cartId,
       token,
     });
-    return;
-  } catch (error: any) {
-    console.log("Register", error);
-    res.status(500).json({ error: "Erorr during register please try later.." });
-    return;
+  } catch (err) {
+    console.error("Register error:", err);
+    res.status(500).json({ error: "Error during register, please try later." });
   }
 };
 
@@ -93,59 +93,64 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     //Check email password
     if (!email || !password) {
-      res.status(400).json({ error: "please fill Email or password" });
+      res.status(400).json({ error: "please fill email and password" });
       return;
     }
 
     // search
-    const findUser = "SELECT * FROM uesrs WHERE email = $1";
-    const userResult = await pool.query(findUser, [email]);
-
-    if (userResult.rows.length === 0) {
-      //if you are not already user
-      res.status(400).json({ error: "data wrong" });
+    const { rows: userRows } = await pool.query(
+      `SELECT id, first_name, last_name, email, password FROM users WHERE email = $1`,
+      [email]
+    );
+    if (!userRows.length) {
+      res.status(400).json({ error: "Invalid credentials" });
       return;
     }
-
-    const user = userResult.rows[0];
+    const user = userRows[0];
 
     // compare password
-    const isMatch = bcrypt.compareSync(password, user.password);
-    if (!isMatch) {
-      // if not match
-      res.status(400).json({ error: "Data login wrong!" });
+    if (!bcrypt.compareSync(password, user.password)) {
+      res.status(400).json({ error: "Invalid credentials" });
       return;
     }
 
     //after check Pass
-    const jwtSecret: string = process.env.JWT_SECRET || "";
-    const expiresIn: string = process.env.JWT_EXPIRES_IN || "1h";
-
-    if (!jwtSecret) {
-      res.status(500).json({ error: "Not defined" });
-      return;
+    let cartId: number;
+    const { rows: existingCart } = await pool.query(
+      `SELECT id FROM carts WHERE user_id = $1 AND status = 'ACTIVE' LIMIT 1`,
+      [user.id]
+    );
+    if (existingCart.length) {
+      cartId = existingCart[0].id;
+    } else {
+      const { rows: newCart } = await pool.query(
+        `
+        INSERT INTO carts (user_id, status, is_deleted, created_at, updated_at)
+        VALUES ($1, 'ACTIVE', false, NOW(), NOW())
+        RETURNING id
+        `,
+        [user.id]
+      );
+      cartId = newCart[0].id;
     }
 
-    const token = Jwt.sign({ userId: user.user_id }, jwtSecret, {
-      expiresIn: expiresIn,
+    // return without password
+    const token = Jwt.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN,
     });
-
-    //return without password
     res.status(200).json({
-      message: "login succesfuly",
+      message: "Login successful",
       user: {
-        user_id: user.user_id,
+        id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
       },
+      cartId,
       token,
     });
-    return;
-  } catch (error: any) {
-    // if there is wrong
-    console.error("❌:", error);
-    res.status(500).json({ error: "Wrong during login" });
-    return;
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Error during login, please try later." });
   }
 };

@@ -50,7 +50,7 @@ CREATE TABLE "orders" (
 
 CREATE TABLE "role" (
   "role_id" SERIAL PRIMARY KEY,
-  "permission" varchar
+  "permission" varchar[]
 );
 
 ALTER TABLE "locations" ADD CONSTRAINT "locations_uesrs" FOREIGN KEY ("locations_id") REFERENCES "uesrs" ("user_id");
