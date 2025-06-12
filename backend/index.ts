@@ -9,6 +9,9 @@ import orderRoutes from "./src/routes/order";
 import orderProductRoutes from "./src/routes/orderProduct";
 import categoryRoutes from "./src/routes/category";
 import productRoutes from "./src/routes/product"
+
+import cartRouter from "./src/routes/cart";
+
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
@@ -26,6 +29,7 @@ app.use("/api/roles", roleRoutes);
 app.use("/orders", orderRoutes);
 app.use("/order-products", orderProductRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/cart", cartRouter);
 // Default route
 app.get("/", (req, res) => {
   res.send("API is running...");
