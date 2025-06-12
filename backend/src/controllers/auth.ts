@@ -8,7 +8,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -107,7 +106,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     // Generate JWT token
     const token = JWT.sign({ userId: user.id }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
+      expiresIn: "1h",
     });
 
     // Send response (without password)
