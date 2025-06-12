@@ -8,18 +8,19 @@ import roleRoutes from "./src/routes/role";
 import orderRoutes from "./src/routes/order";
 import orderProductRoutes from "./src/routes/orderProduct";
 import categoryRoutes from "./src/routes/category";
+import productRoutes from "./src/routes/product"
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
-// Import Routers
-import productRoutes from "./src/routes/product";
+
+
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.use("/products", productRoutes);
+app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/orders", orderRoutes);
