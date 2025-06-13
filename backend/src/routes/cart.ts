@@ -1,4 +1,5 @@
 import { Router } from "express";
+import authentication from "../middleware/authentication";
 
 const {
   getAllCartByIsDeletedTrue,
@@ -9,9 +10,17 @@ const {
 
 const cartRouter = Router();
 
-cartRouter.get("/getAllCartByIsDeletedTrue", getAllCartByIsDeletedTrue);
-cartRouter.get("/getAllCartByIsDeletedFalse", getAllCartByIsDeletedFalse);
-cartRouter.post("/createNewCart", createNewCart);
-cartRouter.put("/deleteCartById/:id", deleteCartById);
+cartRouter.get(
+  "/getAllCartByIsDeletedTrue",
+  authentication,
+  getAllCartByIsDeletedTrue
+);
+cartRouter.get(
+  "/getAllCartByIsDeletedFalse",
+  authentication,
+  getAllCartByIsDeletedFalse
+);
+cartRouter.post("/createNewCart", authentication, createNewCart);
+cartRouter.put("/deleteCartById/:id", authentication, deleteCartById);
 
 export default cartRouter;
