@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import pool from "../models/connectDB";
 import bcrypt from "bcryptjs";
-import JWT from "jsonwebtoken"
+import JWT from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -77,7 +77,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
-
     // Validate input
     if (!email || !password) {
       res.status(400).json({ error: "Please provide email and password." });
@@ -122,10 +121,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (err) {
     console.error("Login error:", err);
-    res
-      .status(500)
-      .json({
-        error: "An error occurred during login. Please try again later.",
-      });
+    res.status(500).json({
+      error: "An error occurred during login. Please try again later.",
+    });
   }
 };
