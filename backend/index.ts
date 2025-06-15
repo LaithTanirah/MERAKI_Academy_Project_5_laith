@@ -10,10 +10,10 @@ import orderProductRoutes from "./src/routes/orderProduct";
 import categoryRoutes from "./src/routes/category";
 import productRoutes from "./src/routes/product";
 import cartProductRouter from "./src/routes/cartProduct";
-
 import cartRouter from "./src/routes/cart";
 import permissionRoutes from "./src/routes/permission";
 import rolePermissionRoutes from "./src/routes/rolePermission";
+import favoriteRouter from "./src/routes/favorite";
 
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
@@ -33,6 +33,7 @@ app.use("/api/cart", cartRouter);
 app.use("/api/cartProduct", cartProductRouter);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/rolePermissions", rolePermissionRoutes);
+app.use("/api/favorite", favoriteRouter);
 // Default route
 app.get("/", (req, res) => {
   res.send("API is running...");
