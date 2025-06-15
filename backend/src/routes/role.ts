@@ -1,24 +1,27 @@
 import express  from "express";
-
 import {
-    createRole,
-    getAllRoles,
-    updateRole,
-    deleteRole,
-  } from "../controllers/role";
+  createRole,
+  getAllRoles,
+  getRoleById,      
+  updateRole,
+  deleteRole,
+} from "../controllers/role";
 
-  const router = express.Router();
+const router = express.Router();
 
-// POST /api/roles 
+// POST   /api/roles
 router.post("/", createRole);
 
-// GET /api/roles 
+// GET    /api/roles       
 router.get("/", getAllRoles);
 
-// PUT /api/roles/:id 
+// GET    /api/roles/:id    
+router.get("/:id", getRoleById);
+
+// PUT    /api/roles/:id  
 router.put("/:id", updateRole);
 
-// DELETE /api/roles/:id 
+// DELETE /api/roles/:id )
 router.delete("/:id", deleteRole);
 
 export default router;
