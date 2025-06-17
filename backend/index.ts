@@ -5,8 +5,8 @@ dotenv.config();
 import "./src/models/connectDB";
 import authRoutes from "./src/routes/auth";
 import roleRoutes from "./src/routes/role";
-import orderRoutes from "./src/routes/order";
-import orderProductRoutes from "./src/routes/orderProduct";
+
+
 import categoryRoutes from "./src/routes/category";
 import productRoutes from "./src/routes/product";
 import cartProductRouter from "./src/routes/cartProduct";
@@ -26,8 +26,8 @@ app.use(express.json());
 app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
-app.use("/orders", orderRoutes);
-app.use("/order-products", orderProductRoutes);
+
+
 app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", cartRouter);
 app.use("/api/cartProduct", cartProductRouter);
