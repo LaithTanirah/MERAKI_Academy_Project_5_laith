@@ -1,100 +1,154 @@
-"use client"
-import * as React from 'react';
-import { CssVarsProvider, useColorScheme } from '@mui/joy/styles';
-import Sheet from '@mui/joy/Sheet';
-import CssBaseline from '@mui/joy/CssBaseline';
-import Typography from '@mui/joy/Typography';
-import FormControl from '@mui/joy/FormControl';
-import FormLabel from '@mui/joy/FormLabel';
-import Input from '@mui/joy/Input';
-import Button from '@mui/joy/Button';
-import Link from '@mui/joy/Link';
-import Select from '@mui/joy/Select';
-import Option from '@mui/joy/Option';
+'use client';
 
-function ModeToggle() {
-  const { mode, setMode } = useColorScheme();
-  const [mounted, setMounted] = React.useState(false);
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import {
+  Box, Paper, Typography, TextField,
+  Button, Drawer, List, ListItem, Avatar, Alert
+} from '@mui/material'
+import { loginUser, LoginData } from '../../services/auth'
 
-  // necessary for server-side rendering
-  // because mode is undefined on the server
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-  if (!mounted) {
-    return <Button variant="soft">Change mode</Button>;
+const benefits = [
+  'Faster checkout',
+  'Order tracking',
+  'Exclusive deals',
+  'Save favorites',
+]
+const logos = [
+  '/logos/company1.png',
+  '/logos/company2.png',
+  '/logos/company3.png',
+  '/logos/company4.png',
+]
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [form, setForm] = useState<LoginData>({ email: '', password: '' })
+  const [error, setError] = useState<string|null>(null)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    try {
+      const { token } = await loginUser(form)
+      localStorage.setItem('token', token)
+      router.push('/')
+    } catch (err: any) {
+      setError(err.message)
+    }
   }
 
   return (
-    <Select
-      variant="soft"
-      value={mode}
-      onChange={(event, newMode) => {
-        setMode(newMode);
+    <Box
+      sx={{
+        minHeight: 'calc(100vh - 64px)',
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
+        bgcolor: 'background.default', p: 2, position: 'relative',
       }}
-      sx={{ width: 'max-content' }}
     >
-      <Option value="system">System</Option>
-      <Option value="light">Light</Option>
-      <Option value="dark">Dark</Option>
-    </Select>
-  );
-}
-
-export default function LoginFinal(props) {
-  return (
-    <main>
-      <CssVarsProvider {...props}>
-        <ModeToggle />
-        <CssBaseline />
-        <Sheet
-          sx={{
-            width: 300,
-            mx: 'auto', // margin left & right
-            my: 4, // margin top & bottom
-            py: 3, // padding top & bottom
-            px: 2, // padding left & right
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            borderRadius: 'sm',
-            boxShadow: 'md',
-          }}
-          variant="outlined"
+      {error && (
+        <Alert
+          severity="error"
+          onClose={() => setError(null)}
+          sx={{ position: 'absolute', top: 16, width: '100%', maxWidth: 360 }}
         >
-          <div>
-            <Typography level="h4" component="h1">
-              <b>Welcome!</b>
-            </Typography>
-            <Typography level="body-sm">Sign in to continue.</Typography>
-          </div>
-          <FormControl>
-            <FormLabel>Email</FormLabel>
-            <Input
-              // html input attribute
-              name="email"
-              type="email"
-              placeholder="johndoe@email.com"
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Password</FormLabel>
-            <Input
-              // html input attribute
-              name="password"
-              type="password"
-              placeholder="password"
-            />
-          </FormControl>
-          <Button sx={{ mt: 1 /* margin top */ }}>Log in</Button>
-          <Typography
-            endDecorator={<Link href="/sign-up">Sign up</Link>}
-            sx={{ fontSize: 'sm', alignSelf: 'center' }}
+          {error}
+        </Alert>
+      )}
+
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => setOpen(true)}
+        sx={{
+          position: 'fixed', top: '50%', right: 16,
+          transform: 'translateY(-50%)', borderRadius: 2,
+        }}
+      >
+        Benefits
+      </Button>
+
+      <Paper
+        elevation={8}
+        sx={{ p: 4, maxWidth: 360, width: '100%', textAlign: 'center', borderRadius: 3 }}
+      >
+        <Typography variant="h4" color="primary" gutterBottom>
+          Avocado
+        </Typography>
+        <Typography variant="subtitle1" gutterBottom>
+          Sign in to your account
+        </Typography>
+
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          <TextField
+            label="Email"
+            name="email"
+            type="email"
+            fullWidth
+            margin="normal"
+            required
+            value={form.email}
+            onChange={handleChange}
+          />
+          <TextField
+            label="Password"
+            name="password"
+            type="password"
+            fullWidth
+            margin="normal"
+            required
+            value={form.password}
+            onChange={handleChange}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            size="large"
+            sx={{ mt: 3 }}
           >
-            Don&apos;t have an account?
+            Sign In
+          </Button>
+        </Box>
+
+        <Link href="/register" passHref style={{ textDecoration: 'none' }}>
+          <Button sx={{ mt: 2, textTransform: 'none' }}>
+            Don’t have an account? Register
+          </Button>
+        </Link>
+      </Paper>
+
+      <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+        <Box sx={{ width: 280, p: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Benefits of registering
           </Typography>
-        </Sheet>
-      </CssVarsProvider>
-    </main>
-  );
+          <List>
+            {benefits.map(b => (
+              <ListItem key={b} sx={{ pl: 0 }}>• {b}</ListItem>
+            ))}
+          </List>
+          <Typography variant="subtitle1" sx={{ mt: 3 }} gutterBottom>
+            Trusted by
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {logos.map(src => (
+              <Avatar
+                key={src}
+                variant="square"
+                src={src}
+                sx={{ width: 56, height: 56, bgcolor: '#fff', borderRadius: 1 }}
+              />
+            ))}
+          </Box>
+        </Box>
+      </Drawer>
+    </Box>
+  )
 }
