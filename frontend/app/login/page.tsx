@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -17,6 +17,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
+import { useSearchParams } from "next/navigation";
 
 export default function AuthSplitLayout() {
   const [showRegister, setShowRegister] = useState(false);
@@ -33,6 +34,19 @@ export default function AuthSplitLayout() {
     password: "",
     phone_number: "",
   });
+
+  const searchParams = useSearchParams();
+
+  // ✅ Read token from URL after Google login
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token) {
+      localStorage.setItem("token", token);
+      showModal("Success", "Logged in with Google successfully!");
+      // Optionally redirect:
+      // window.location.href = "/dashboard";
+    }
+  }, [searchParams]);
 
   const showModal = (title: string, message: string) => {
     setModalTitle(title);
@@ -73,6 +87,10 @@ export default function AuthSplitLayout() {
     } catch (err: any) {
       showModal("Error", err.response?.data?.message || "Registration failed");
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:5000/api/auth/google";
   };
 
   return (
@@ -202,6 +220,37 @@ export default function AuthSplitLayout() {
                       }}
                     >
                       Login
+                    </Button>
+
+                    {/* Google Login Button */}
+                    <Button
+                      onClick={handleGoogleLogin}
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        mt: 2,
+                        py: 1.5,
+                        fontWeight: "bold",
+                        fontSize: "1rem",
+                        color: "#4285F4",
+                        borderColor: "#4285F4",
+                        boxShadow: "2px 2px 8px rgba(0,0,0,0.1)",
+                        "&:hover": {
+                          backgroundColor: "#f5f5f5",
+                          borderColor: "#4285F4",
+                        },
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <img
+                        src="https://developers.google.com/identity/images/g-logo.png"
+                        alt="Google"
+                        style={{ width: 20, height: 20 }}
+                      />
+                      Login with Google
                     </Button>
                   </Box>
                 </motion.div>
@@ -355,7 +404,13 @@ export default function AuthSplitLayout() {
 
       <Dialog
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          if (modalTitle.toLowerCase().includes("success")) {
+            // Optional redirect
+            // window.location.href = "/dashboard";
+          }
+        }}
         PaperProps={{
           sx: {
             borderRadius: 3,
@@ -388,7 +443,13 @@ export default function AuthSplitLayout() {
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center" }}>
           <Button
-            onClick={() => setModalOpen(false)}
+            onClick={() => {
+              setModalOpen(false);
+              if (modalTitle.toLowerCase().includes("success")) {
+                // Optional redirect
+                // window.location.href = "/dashboard";
+              }
+            }}
             variant="contained"
             sx={{
               mt: 2,
