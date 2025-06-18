@@ -1,13 +1,40 @@
 // controllers/auth.ts
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import pool from "../models/connectDB";
 import bcrypt from "bcryptjs";
 import JWT from "jsonwebtoken";
 import dotenv from "dotenv";
+import passport from "passport";
 
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET!;
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+
+export const googleLogin = passport.authenticate("google", {
+  scope: ["profile", "email"],
+});
+
+export const googleCallback = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  passport.authenticate("google", async (err: any, userData: any) => {
+    if (err || !userData) {
+      console.error("Google login failed:", err);
+      return res.redirect(`${FRONTEND_URL}/login?error=GoogleLoginFailed`);
+    }
+
+    const { user } = userData;
+    const token = userData.token;
+
+    // Redirect to frontend with token in query
+    res.redirect(`${FRONTEND_URL}?token=${token}`);
+  })(req, res, next);
+};
+
+
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
