@@ -26,7 +26,7 @@ export default function RootLayout({
   
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Navbar />
+          {/*<Navbar />*/}
           {children}
         </ThemeProvider>
       </body>
