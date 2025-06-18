@@ -1,17 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  Paper,
+  TextField,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 
 export default function AuthSplitLayout() {
   const [showRegister, setShowRegister] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
 
-  const [loginForm, setLoginForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
 
   const [registerForm, setRegisterForm] = useState({
     first_name: "",
@@ -20,6 +33,12 @@ export default function AuthSplitLayout() {
     password: "",
     phone_number: "",
   });
+
+  const showModal = (title: string, message: string) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalOpen(true);
+  };
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,9 +58,9 @@ export default function AuthSplitLayout() {
         loginForm
       );
       localStorage.setItem("token", data.token);
-      alert("Login successful!");
+      showModal("Success", "Login successful!");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Login failed");
+      showModal("Error", err.response?.data?.message || "Login failed");
     }
   };
 
@@ -49,10 +68,10 @@ export default function AuthSplitLayout() {
     e.preventDefault();
     try {
       await axios.post("http://localhost:5000/api/auth/register", registerForm);
-      alert("Registration successful!");
+      showModal("Success", "Registration successful!");
       setShowRegister(false);
     } catch (err: any) {
-      alert(err.response?.data?.message || "Registration failed");
+      showModal("Error", err.response?.data?.message || "Registration failed");
     }
   };
 
@@ -80,7 +99,6 @@ export default function AuthSplitLayout() {
         }}
       >
         <Grid container>
-          {/* LEFT SIDE */}
           <Grid
             item
             xs={12}
@@ -191,7 +209,6 @@ export default function AuthSplitLayout() {
             </AnimatePresence>
           </Grid>
 
-          {/* RIGHT SIDE */}
           <Grid
             item
             xs={12}
@@ -335,6 +352,64 @@ export default function AuthSplitLayout() {
           </Grid>
         </Grid>
       </Paper>
+
+      <Dialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 3,
+            minWidth: 300,
+            textAlign: "center",
+          },
+        }}
+      >
+        {modalTitle.toLowerCase().includes("success") ? (
+          <CheckCircleIcon sx={{ fontSize: 60, color: "green", mb: 2 }} />
+        ) : (
+          <ErrorIcon sx={{ fontSize: 60, color: "red", mb: 2 }} />
+        )}
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+            color: modalTitle.toLowerCase().includes("success")
+              ? "green"
+              : "red",
+          }}
+        >
+          {modalTitle}
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontSize: "1rem", color: "#555" }}>
+            {modalMessage}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center" }}>
+          <Button
+            onClick={() => setModalOpen(false)}
+            variant="contained"
+            sx={{
+              mt: 2,
+              px: 4,
+              py: 1,
+              borderRadius: 2,
+              backgroundColor: modalTitle.toLowerCase().includes("success")
+                ? "green"
+                : "red",
+              color: "#fff",
+              "&:hover": {
+                backgroundColor: modalTitle.toLowerCase().includes("success")
+                  ? "#2e7d32"
+                  : "#c62828",
+              },
+            }}
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
