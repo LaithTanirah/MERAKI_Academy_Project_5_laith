@@ -14,10 +14,12 @@ export interface LoginData {
     token: string
   }
   
-  const API = process.env.NEXT_PUBLIC_API_URL
+  const API = process.env.API
   
   export async function loginUser(data: LoginData): Promise<AuthResponse> {
-    const res = await fetch(`${API}/auth/login`, {
+    console.log(data);
+    
+    const res = await fetch(`http://localhost:5000/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),

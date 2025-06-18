@@ -1,11 +1,18 @@
-// app/page.tsx
-'use client';
+'use client'
 
-import React from 'react';
-import { Box, Typography, Button, Container, Grid } from '@mui/material';
-import Categories from '../components/Categories';
-import ProductCard from '../components/ProductCard';
-import WhyChoose from '../components/WhyChoose';
+import React from 'react'
+import NextLink from 'next/link'
+import {
+  Box,
+  Typography,
+  Button,
+  Container,
+  Grid
+} from '@mui/material'
+
+import Categories from '../components/Categories'
+import ProductCard from '../components/ProductCard'
+import WhyChoose from '../components/WhyChoose'
 
 export default function HomePage() {
   const featured = [
@@ -30,23 +37,32 @@ export default function HomePage() {
       image: '/images/hair-mask.jpg',
       category: 'Beauty & Personal Care',
     },
-  ];
-  
+  ]
 
   return (
     <main>
-      {/* Hero */}
+      {/* Hero Section */}
       <Box component="section" sx={{ bgcolor: 'secondary.main', color: '#fff', py: 8 }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
-          <Typography variant="h2" gutterBottom>Welcome to Avocado</Typography>
+          <Typography variant="h2" gutterBottom>
+            Welcome to Avocado
+          </Typography>
           <Typography variant="subtitle1" sx={{ mb: 4 }}>
             Fresh, Healthy &amp; Organic Products Delivered to Your Doorstep
           </Typography>
-          <Button variant="contained" size="large">Shop Now</Button>
+          <Button
+            component={NextLink}
+            href="/shop"
+            variant="contained"
+            size="large"
+            sx={{ textTransform: 'none' }}
+          >
+            Shop Now
+          </Button>
         </Container>
       </Box>
 
-      {/* Categories */}
+      {/* Categories Section */}
       <Box component="section" sx={{ py: 6 }}>
         <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 500 }}>
@@ -56,29 +72,28 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      {/* Featured Products */}
+      {/* Featured Products Section */}
       <Box component="section" sx={{ py: 6 }}>
         <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 500 }}>
             Featured Products
           </Typography>
           <Grid container spacing={4} justifyContent="center">
-            {featured.map((p) => (
-              <Grid item key={p.id} xs={12} sm={6} md={4}>
-                <ProductCard {...p} />
+            {featured.map((product) => (
+              <Grid item key={product.id} xs={12} sm={6} md={4}>
+                <ProductCard {...product} />
               </Grid>
             ))}
           </Grid>
         </Container>
       </Box>
 
-      {/* Why Choose */}
+      {/* Why Choose Us Section */}
       <Box component="section" sx={{ py: 6 }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
-         
           <WhyChoose />
         </Container>
       </Box>
     </main>
-  );
+  )
 }
