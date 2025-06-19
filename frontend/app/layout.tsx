@@ -2,7 +2,7 @@
 
 import './globals.css';
 import { ThemeProvider, CssBaseline, createTheme } from '@mui/material';
-
+import { usePathname } from 'next/navigation'; 
 import Navbar from '../components/Navbar';
 
 const theme = createTheme({
@@ -20,13 +20,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const hideNavbar = pathname === '/login';
+
   return (
     <html lang="en">
       <body>
-  
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {/*<Navbar />*/}
+          {!hideNavbar && <Navbar />}
           {children}
         </ThemeProvider>
       </body>
