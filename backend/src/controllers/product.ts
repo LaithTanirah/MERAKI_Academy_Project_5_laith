@@ -8,11 +8,22 @@ export const getProducts = async (
   res: Response
 ): Promise<void> => {
   try {
-    const result = await pool.query<Product>(
-      `SELECT * 
-         FROM products 
-        WHERE isdeleted = false`
-    );
+    const query = `
+      SELECT
+        p.id,
+        p.title,
+        p.description,
+        p.price,
+        p.size,
+        p.images,
+        p.isdeleted,
+        p.categoryid,
+        c.title AS category
+      FROM products p
+      JOIN category c ON p.categoryid = c.id
+      WHERE p.isdeleted = false
+    `;
+    const result = await pool.query(query);
     res.status(200).json(result.rows);
   } catch (error) {
     console.error("Get products error:", error);
@@ -27,13 +38,16 @@ export const getProductById = async (
 ): Promise<void> => {
   const id = +req.params.id;
   try {
-    const result = await pool.query<Product>(
-      `SELECT * 
-         FROM products 
-        WHERE id = $1 
-          AND isdeleted = false`,
-      [id]
-    );
+    const query = `
+      SELECT
+        p.id, p.title, p.description, p.price,
+        p.size, p.images, p.isdeleted, p.categoryid,
+        c.title AS category
+      FROM products p
+      JOIN category c ON p.categoryid = c.id
+      WHERE p.id = $1 AND p.isdeleted = false
+    `;
+    const result = await pool.query(query, [id]);
     if (result.rows.length === 0) {
       res.status(404).json({ message: "Product not found" });
       return;
@@ -44,7 +58,6 @@ export const getProductById = async (
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 // POST /api/products
 export const createProduct = async (
   req: Request,
