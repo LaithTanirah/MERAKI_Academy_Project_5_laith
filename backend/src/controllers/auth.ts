@@ -26,15 +26,11 @@ export const googleCallback = (
       return res.redirect(`${FRONTEND_URL}/login?error=GoogleLoginFailed`);
     }
 
-    const { user } = userData;
-    const token = userData.token;
+    const { token } = userData;
 
-    // Redirect to frontend with token in query
     res.redirect(`${FRONTEND_URL}?token=${token}`);
   })(req, res, next);
 };
-
-
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {

@@ -10,7 +10,7 @@ const router = Router();
 
 router.post("/register", register);
 router.post("/login", login);
-router.get("/auth/google", googleLogin);
-router.get("/auth/google/callback", googleCallback);
+router.get("/google", googleLogin);
+router.get("/google/callback", googleCallback);
 
 export default router;
