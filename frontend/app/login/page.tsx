@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -37,13 +36,11 @@ export default function AuthSplitLayout() {
 
   const searchParams = useSearchParams();
 
-
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) {
       localStorage.setItem("token", token);
       showModal("Success", "Logged in with Google successfully!");
-
     }
   }, [searchParams]);
 
@@ -90,6 +87,7 @@ export default function AuthSplitLayout() {
 
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:5000/api/auth/google";
+    console.log(window.location.href);
   };
 
   return (
@@ -221,7 +219,6 @@ export default function AuthSplitLayout() {
                       Login
                     </Button>
 
-                    {/* Google Login Button */}
                     <Button
                       onClick={handleGoogleLogin}
                       fullWidth
@@ -406,8 +403,6 @@ export default function AuthSplitLayout() {
         onClose={() => {
           setModalOpen(false);
           if (modalTitle.toLowerCase().includes("success")) {
-            // Optional redirect
-            // window.location.href = "/dashboard";
           }
         }}
         PaperProps={{
@@ -445,8 +440,6 @@ export default function AuthSplitLayout() {
             onClick={() => {
               setModalOpen(false);
               if (modalTitle.toLowerCase().includes("success")) {
-                // Optional redirect
-                // window.location.href = "/dashboard";
               }
             }}
             variant="contained"
