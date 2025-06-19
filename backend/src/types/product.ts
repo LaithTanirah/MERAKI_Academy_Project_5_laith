@@ -7,5 +7,6 @@ export interface Product {
     images: string[];
     isdeleted: boolean;
     categoryid: number;
+    category: string; 
   }
   
