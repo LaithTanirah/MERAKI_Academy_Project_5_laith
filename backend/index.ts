@@ -2,10 +2,11 @@ import express, { Application } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
+import session from "express-session";
+import passport from "./src/config/passport";
 import "./src/models/connectDB";
 import authRoutes from "./src/routes/auth";
 import roleRoutes from "./src/routes/role";
-
 
 import categoryRoutes from "./src/routes/category";
 import productRoutes from "./src/routes/product";
@@ -21,13 +22,20 @@ const PORT = process.env.PORT || 5000;
 // Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(
+  session({
+    secret: "keyboard cat", // use something secure
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // API Routes
 app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
-
-
 app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", cartRouter);
 app.use("/api/cartProduct", cartProductRouter);
