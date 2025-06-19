@@ -37,14 +37,13 @@ export default function AuthSplitLayout() {
 
   const searchParams = useSearchParams();
 
-  // ✅ Read token from URL after Google login
+
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) {
       localStorage.setItem("token", token);
       showModal("Success", "Logged in with Google successfully!");
-      // Optionally redirect:
-      // window.location.href = "/dashboard";
+
     }
   }, [searchParams]);
 
