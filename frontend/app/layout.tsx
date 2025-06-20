@@ -1,16 +1,19 @@
-'use client';
+"use client";
 
-import './globals.css';
-import { ThemeProvider, CssBaseline, createTheme } from '@mui/material';
-import { usePathname } from 'next/navigation'; 
-import Navbar from '../components/Navbar';
+import "./globals.css";
+import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import { usePathname } from "next/navigation";
+import Navbar from "../components/Navbar";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import "./globals.css";
 
 const theme = createTheme({
   palette: {
-    primary:   { main: '#689F38' },
-    secondary: { main: '#AED581' },
-    background:{ default: '#F5F5F5' },
-    text:      { primary: '#333' },
+    primary: { main: "#689F38" },
+    secondary: { main: "#AED581" },
+    background: { default: "#F5F5F5" },
+    text: { primary: "#333" },
   },
   typography: { fontFamily: '"Roboto", sans-serif' },
 });
@@ -21,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const hideNavbar = pathname === '/login';
+  const hideNavbar = pathname === "/login";
 
   return (
     <html lang="en">
