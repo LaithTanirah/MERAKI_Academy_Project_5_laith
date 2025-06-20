@@ -1,10 +1,45 @@
 /* app/globals.css */
+
 html, body, #__next {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: 'Roboto', sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
 }
+
 a {
   text-decoration: none;
+  color: inherit;
+}
+
+/* Smooth scrolling and better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* react-slick custom styling */
+.slick-slider {
+  margin-left: -10px;
+  margin-right: -10px;
+}
+
+.slick-slide > div {
+  padding: 0 10px;
+}
+
+.slick-dots li button:before {
+  color: #4caf50;
+  opacity: 0.7;
+}
+
+.slick-dots li.slick-active button:before {
+  opacity: 1;
+  color: #388e3c;
+}
+
+/* Optional: hide overflow on mobile for smoother transitions */
+body {
+  overflow-x: hidden;
 }
