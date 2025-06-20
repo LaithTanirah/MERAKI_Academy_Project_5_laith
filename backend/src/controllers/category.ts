@@ -1,24 +1,23 @@
 import { Request, Response } from "express";
 import pool from "../models/connectDB";
 
-//get All categories
-
+// get All categories
 export const getAllcategories = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
     const { rows } = await pool.query(`
-        SELECT * FROM category WHERE is_deleted = false
-        `);
+      SELECT * FROM category WHERE is_deleted = false
+    `);
     res.status(200).json(rows);
   } catch (error) {
     console.error("Get categories error :", error);
     res.status(500).json({ error: "Failed to fetch categories " });
   }
 };
-//get categories by id
 
+// ✅ get category by id - FIXED
 export const getCategoryById = async (
   req: Request,
   res: Response
@@ -28,8 +27,8 @@ export const getCategoryById = async (
   try {
     const { rows } = await pool.query(
       `
-        SELECT * FROM category WHERE  id = S1 AND is_deleted = false
-        `,
+      SELECT * FROM category WHERE id = $1 AND is_deleted = false
+      `,
       [id]
     );
     if (rows.length === 0) {
@@ -44,7 +43,6 @@ export const getCategoryById = async (
 };
 
 // create new Category
-
 export const createCategory = async (
   req: Request,
   res: Response
@@ -53,9 +51,8 @@ export const createCategory = async (
   try {
     const { rows } = await pool.query(
       `
-        INSERT INTO category (title,image) VALUES ($1, $2) RETURNING *
-        
-        `,
+      INSERT INTO category (title,image) VALUES ($1, $2) RETURNING *
+      `,
       [title, image]
     );
     res.status(201).json(rows[0]);
@@ -65,8 +62,7 @@ export const createCategory = async (
   }
 };
 
-// eEdit category
-
+// edit category
 export const updateCategory = async (
   req: Request,
   res: Response
@@ -75,7 +71,7 @@ export const updateCategory = async (
   const { title, image } = req.body;
   try {
     const { rows } = await pool.query(
-      "UPDATE categories SET title = $1, image = $2 WHERE id = $3 AND is_deleted = false RETURNING *",
+      "UPDATE category SET title = $1, image = $2 WHERE id = $3 AND is_deleted = false RETURNING *",
       [title, image, id]
     );
     if (rows.length === 0) {
@@ -89,7 +85,7 @@ export const updateCategory = async (
   }
 };
 
-// soft Delete
+// soft delete
 export const deleteCategory = async (
   req: Request,
   res: Response

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Avatar, Container, Typography, Box } from "@mui/material";
@@ -5,27 +7,35 @@ import Grid from "@mui/material/Grid";
 
 const cats = [
   {
+    id: 1,
     title: "Vitamins & Supplements",
     img: "/logos/vitamins.png",
-    href: "/categories/vitamins",
   },
   {
+    id: 2,
     title: "Food & Beverages",
     img: "/logos/food.png",
-    href: "/categories/food",
   },
   {
+    id: 3,
     title: "Beauty & Personal Care",
     img: "/logos/beauty.png",
-    href: "/categories/beauty",
   },
   {
+    id: 4,
     title: "Active Lifestyle & Fitness",
     img: "/logos/fitness.png",
-    href: "/categories/active",
   },
-  { title: "Pet Supplies", img: "/logos/pet.png", href: "/categories/pet" },
-  { title: "Shop All", img: "/logos/shopall.png", href: "/products" },
+  {
+    id: 5,
+    title: "Pet Supplies",
+    img: "/logos/pet.png",
+  },
+  {
+    title: "Shop All",
+    img: "/logos/shopall.png",
+    href: "/products",
+  },
 ];
 
 export default function Categories() {
@@ -34,7 +44,10 @@ export default function Categories() {
       <Grid container spacing={4} justifyContent="center">
         {cats.map((c) => (
           <Grid key={c.title} xs={6} sm={4} md={2} sx={{ textAlign: "center" }}>
-            <Link href={c.href} style={{ textDecoration: "none" }}>
+            <Link
+              href={c.href ? c.href : `/category/${c.id}`}
+              style={{ textDecoration: "none" }}
+            >
               <Box
                 sx={{
                   display: "block",

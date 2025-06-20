@@ -128,3 +128,26 @@ export const deleteProduct = async (
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const getProductsByCategory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const categoryId = +req.params.id;
+  try {
+    const result = await pool.query(
+      `SELECT
+        p.id, p.title, p.description, p.price, p.size, p.images,
+        p.categoryid, c.title AS category
+       FROM products p
+       JOIN category c ON p.categoryid = c.id
+       WHERE p.categoryid = $1 AND p.isdeleted = false`,
+      [categoryId]
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Get products by category error:", error);
+    res.status(500).json({ error: "Failed to fetch products by category" });
+  }
+};
