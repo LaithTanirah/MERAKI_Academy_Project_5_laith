@@ -18,6 +18,8 @@ export default function ProductsPage() {
       .then(setProducts)
       .catch((err) => setError(err.message));
   }, []);
+  console.log(products);
+  
 
   if (error)
     return (

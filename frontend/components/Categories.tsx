@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Avatar, Container, Typography, Box } from "@mui/material";
@@ -5,6 +7,7 @@ import Grid from "@mui/material/Grid";
 import axios from "axios";
 import { category } from "../types/cat";
 
+// Shop All product info
 const shopAll = {
   title: "Shop All Products",
   img: "/logos/shopall.png",
@@ -33,7 +36,10 @@ export default function Categories() {
             md={2}
             sx={{ textAlign: "center" }}
           >
-            <Link href={`/`} style={{ textDecoration: "none" }}>
+            <Link
+              href={c.href ? c.href : `/category/${c.id}`}
+              style={{ textDecoration: "none" }}
+            >
               <Box
                 sx={{
                   display: "flex",
@@ -45,7 +51,7 @@ export default function Categories() {
                 }}
               >
                 <Avatar
-                  src={`${c.images}`}
+                  src={c.images}
                   alt={c.title}
                   sx={{
                     width: 120,
@@ -69,6 +75,7 @@ export default function Categories() {
         ))}
       </Grid>
 
+      {/* Shop All Section */}
       <Box mt={10} textAlign="center">
         <Link href={shopAll.href} style={{ textDecoration: "none" }}>
           <Box
@@ -112,3 +119,4 @@ export default function Categories() {
     </Container>
   );
 }
+
