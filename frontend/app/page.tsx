@@ -132,7 +132,7 @@ export default function HomePage() {
               {products.map((product: Product) => (
                 <NextLink
                   key={product.id}
-                  href={`/product/${product.id}`}
+                  href={`/category/${product.id}`}
                   passHref
                 >
                   <Box

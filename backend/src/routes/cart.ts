@@ -11,12 +11,12 @@ const {
 const cartRouter = Router();
 
 cartRouter.get(
-  "/getAllCartByIsDeletedTrue",
+  "/getAllCartByIsDeletedTrue/:userId",
   authentication,
   getAllCartByIsDeletedTrue
 );
 cartRouter.get(
-  "/getAllCartByIsDeletedFalse",
+  "/getAllCartByIsDeletedFalse/:userId",
   authentication,
   getAllCartByIsDeletedFalse
 );
