@@ -34,15 +34,16 @@ const createNewCart = (req: AuthenticatedRequest, res: Response): void => {
 
 // This function returns all cart by isDeleted = true
 const getAllCartByIsDeletedTrue = (req: Request, res: Response): void => {
-  const query = "SELECT * FROM cart";
+  const { userId } = req.params;
+  const query = "SELECT * FROM cart WHERE userId = $1";
   pool
-    .query(query)
+    .query(query, [userId])
     .then((result) => {
       const carts = result.rows.filter((ele) => ele.is_deleted === true);
       res.status(200).json({
         success: true,
-        message: "All the carts by is is_deleted = true ",
-        articles: carts,
+        message: `All the carts by is is_deleted = true where user_Id = ${userId}`,
+        cart: carts,
       });
     })
     .catch((err: Error) => {
@@ -55,15 +56,16 @@ const getAllCartByIsDeletedTrue = (req: Request, res: Response): void => {
 };
 
 const getAllCartByIsDeletedFalse = (req: Request, res: Response): void => {
-  const query = "SELECT * FROM cart";
+  const { userId } = req.params;
+  const query = "SELECT * FROM cart WHERE user_Id = $1";
   pool
-    .query(query)
+    .query(query, [userId])
     .then((result) => {
       const carts = result.rows.filter((ele) => ele.is_deleted === false);
       res.status(200).json({
         success: true,
-        message: "All the carts by is is_deleted = false ",
-        articles: carts,
+        message: `All the carts by is_deleted = false where userId = ${userId}`,
+        cart: carts,
       });
     })
     .catch((err: Error) => {
