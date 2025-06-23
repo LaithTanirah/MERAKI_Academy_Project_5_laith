@@ -121,6 +121,45 @@ const deleteCartProduct = (req: Request, res: Response): void => {
       });
     });
 };
+const getDetailedCartProductsByCartId = (req: Request, res: Response): void => {
+  const { cartId } = req.params;
+
+  const query = `
+    SELECT 
+      cp.cartid,
+      p.id AS productId,
+      p.title AS product_title,
+      p.price,
+      p.images,
+      p.size,
+      cp.quantity
+    FROM 
+      cart c 
+    JOIN 
+      cartProduct cp ON c.id = cp.cartid 
+    JOIN 
+      products p ON cp.productid = p.id 
+    WHERE 
+      cp.cartid = $1
+  `;
+
+  pool
+    .query(query, [cartId])
+    .then((result) => {
+      res.status(200).json({
+        success: true,
+        message: `Detailed products for cart ${cartId} retrieved successfully`,
+        result: result.rows,
+      });
+    })
+    .catch((err: Error) => {
+      res.status(500).json({
+        success: false,
+        message: "Server Error",
+        err: err.message,
+      });
+    });
+};
 
 module.exports = {
   addProductToCart,
@@ -128,4 +167,6 @@ module.exports = {
   getCartProductsByCartId,
   updateCartProductQuantity,
   deleteCartProduct,
+  getDetailedCartProductsByCartId, 
 };
+

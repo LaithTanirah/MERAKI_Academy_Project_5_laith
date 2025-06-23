@@ -4,7 +4,7 @@ const {
   getAllCartProducts,
   getCartProductsByCartId,
   updateCartProductQuantity,
-  deleteCartProduct,
+  deleteCartProduct,getDetailedCartProductsByCartId
 } = require("../controllers/cartProduct");
 
 const cartProductRouter = Router();
@@ -14,5 +14,7 @@ cartProductRouter.get("/", getAllCartProducts);
 cartProductRouter.get("/:cartId", getCartProductsByCartId);
 cartProductRouter.put("/:cartId/:productId", updateCartProductQuantity);
 cartProductRouter.delete("/:cartId/:productId", deleteCartProduct);
+cartProductRouter.get("/cart/:cartId", getDetailedCartProductsByCartId);
+
 
 export default cartProductRouter;
