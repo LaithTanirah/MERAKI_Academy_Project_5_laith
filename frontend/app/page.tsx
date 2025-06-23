@@ -5,7 +5,6 @@ import NextLink from "next/link";
 import {
   Box,
   Typography,
-  Button,
   Container,
   useTheme,
   useMediaQuery,
@@ -14,8 +13,10 @@ import { motion } from "framer-motion";
 import Slider from "react-slick";
 import Categories from "../components/Categories";
 import WhyChoose from "../components/WhyChoose";
+import Footer from "../components/Footer";
 import axios from "axios";
 import { Product } from "../types/product";
+
 export default function HomePage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -74,7 +75,7 @@ export default function HomePage() {
               variant={isMobile ? "body1" : "h6"}
               sx={{ mb: 4, opacity: 0.9 }}
             >
-              Fresh, Healthy &amp; Organic Products Delivered to Your Doorstep
+              Fresh, Healthy & Organic Products Delivered to Your Doorstep
             </Typography>
           </motion.div>
         </Container>
@@ -218,6 +219,9 @@ export default function HomePage() {
           <WhyChoose />
         </Container>
       </Box>
+
+      {/* ✅ Footer Section */}
+      <Footer />
     </main>
   );
 }
