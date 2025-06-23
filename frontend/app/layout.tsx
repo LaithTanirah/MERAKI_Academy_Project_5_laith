@@ -2,6 +2,7 @@
 
 import "./globals.css";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import { CssVarsProvider } from '@mui/joy/styles';
 import { usePathname } from "next/navigation";
 import Navbar from "../components/Navbar";
 import "slick-carousel/slick/slick.css";

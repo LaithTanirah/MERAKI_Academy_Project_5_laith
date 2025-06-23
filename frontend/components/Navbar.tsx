@@ -12,9 +12,8 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Divider,
-  useTheme,
   alpha,
+  useTheme,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -50,7 +49,6 @@ export default function Navbar() {
         }}
       >
         <Toolbar sx={{ justifyContent: "space-between", minHeight: 72 }}>
-
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <motion.div whileTap={{ scale: 0.9 }}>
               <IconButton
@@ -70,6 +68,7 @@ export default function Navbar() {
               </IconButton>
             </motion.div>
 
+            {/* Use Link here on Typography via component */}
             <Typography
               variant="h5"
               component={Link}
@@ -80,12 +79,12 @@ export default function Navbar() {
                 fontWeight: 900,
                 letterSpacing: 1.8,
                 fontFamily: "'Poppins', sans-serif",
+                cursor: "pointer",
               }}
             >
-               Avocado
+              Avocado
             </Typography>
           </Box>
-
 
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -96,43 +95,36 @@ export default function Navbar() {
             <SearchBar />
           </motion.div>
 
-
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            {[
-              ["/favorites", <FavoriteBorderIcon key="f" />],
-              [null, <CartButton key="c" />],
-            ].map(([href, Icon], idx) =>
-              href ? (
-                <Link key={idx} href={""} passHref legacyBehavior>
-                  <IconButton
-                    component="a"
-                    color="inherit"
-                    sx={{
-                      bgcolor: alpha("#fff", 0.1),
-                      borderRadius: 2,
-                      transition: "all 0.3s",
-                      "&:hover": { bgcolor: alpha("#fff", 0.2) },
-                    }}
-                  >
-                    {Icon}
-                  </IconButton>
-                </Link>
-              ) : (
-                <motion.div key={idx} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
-                  <IconButton
-                    color="inherit"
-                    sx={{
-                      bgcolor: alpha("#fff", 0.1),
-                      borderRadius: 2,
-                      transition: "all 0.3s",
-                      "&:hover": { bgcolor: alpha("#fff", 0.2) },
-                    }}
-                  >
-                    {Icon}
-                  </IconButton>
-                </motion.div>
-              )
-            )}
+            {/* Favorites icon linked using component={Link} */}
+            <IconButton
+              component={Link}
+              href="/favorites"
+              color="inherit"
+              sx={{
+                bgcolor: alpha("#fff", 0.1),
+                borderRadius: 2,
+                transition: "all 0.3s",
+                "&:hover": { bgcolor: alpha("#fff", 0.2) },
+              }}
+            >
+              <FavoriteBorderIcon />
+            </IconButton>
+
+            {/* CartButton stays as is (not a link) */}
+            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
+              <IconButton
+                color="inherit"
+                sx={{
+                  bgcolor: alpha("#fff", 0.1),
+                  borderRadius: 2,
+                  transition: "all 0.3s",
+                  "&:hover": { bgcolor: alpha("#fff", 0.2) },
+                }}
+              >
+                <CartButton />
+              </IconButton>
+            </motion.div>
 
             <motion.div whileHover={{ rotate: 20 }} whileTap={{ rotate: 0 }}>
               <IconButton
@@ -198,26 +190,27 @@ export default function Navbar() {
                 { text: "Favorites", icon: <FavoriteBorderIcon />, link: "/favorites" },
                 { text: "Contact Us", icon: <ContactMailIcon />, link: "/contact" },
               ].map(({ text, icon, link }) => (
-                <Link key={text} href={link} passHref legacyBehavior>
-                  <ListItem
-                    component="a"
-                    sx={{
+                <ListItem
+                  key={text}
+                  button
+                  component={Link}
+                  href={link}
+                  sx={{
+                    color: "#fff",
+                    "&:hover": {
+                      bgcolor: alpha("#ffffff", 0.15),
+                      pl: 3,
+                      transition: "all 0.3s",
                       color: "#fff",
-                      "&:hover": {
-                        bgcolor: alpha("#ffffff", 0.15),
-                        pl: 3,
-                        transition: "all 0.3s",
-                        color: "#fff",
-                      },
-                      "& .MuiListItemIcon-root": {
-                        color: "#fff",
-                      },
-                    }}
-                  >
-                    <ListItemIcon>{icon}</ListItemIcon>
-                    <ListItemText primary={text} />
-                  </ListItem>
-                </Link>
+                    },
+                    "& .MuiListItemIcon-root": {
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  <ListItemIcon>{icon}</ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItem>
               ))}
             </List>
           </Box>
