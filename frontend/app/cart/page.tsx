@@ -1,281 +1,367 @@
 "use client";
-import React, { useState, useEffect, ChangeEvent } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 import {
-  MDBBtn,
-  MDBCard,
-  MDBCardBody,
-  MDBCardHeader,
-  MDBCardImage,
-  MDBCol,
-  MDBContainer,
-  MDBIcon,
-  MDBInput,
-  MDBListGroup,
-  MDBListGroupItem,
-  MDBRipple,
-  MDBRow,
-  MDBTooltip,
-  MDBTypography,
-} from "mdb-react-ui-kit";
-
-// Types
-interface CartItem {
-  id: number;
-  quantity: number;
-}
-
+  Paper,
+  Typography,
+  Button,
+  IconButton,
+  Stack,
+  TextField,
+  CircularProgress,
+  Grid,
+  Card,
+  CardMedia,
+  CardContent,
+  CardActions,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { motion } from "framer-motion";
 interface CartProduct {
   id: number;
   title: string;
-  color: string;
-  size: string;
   price: number;
-  image?: string;
+  size: string;
+  image: string[];
 }
-
+interface CartItem {
+  productid: number;
+  quantity: number;
+}
 interface TokenPayload {
-  userId: string;
-  iat?: number;
-  exp?: number;
+  userId: string | number;
 }
-
-export default function PaymentMethods() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [cartProducts, setCartProducts] = useState<Record<number, CartProduct>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const ShoppingCart: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
-
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-  // Decode token to get userId
+  const [token, setToken] = useState<string | null>(null);
+  const [cartId, setCartId] = useState<number | null>(null);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartProductList, setCartProductList] = useState<CartProduct[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  // New: track deleting product id
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(
+    null
+  );
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) setToken(storedToken);
+  }, []);
   useEffect(() => {
     if (token) {
       try {
         const decoded = jwtDecode<TokenPayload>(token);
         const parsedUserId = Number(decoded.userId);
-        setUserId(!isNaN(parsedUserId) ? parsedUserId : 8);
+        setUserId(!isNaN(parsedUserId) ? parsedUserId : null);
       } catch (err) {
         console.error("Invalid token:", err);
-        setUserId(8); // fallback
+        setUserId(null);
       }
-    } else {
-      setUserId(8); // fallback
     }
   }, [token]);
-
-  // Fetch cart items
   useEffect(() => {
-    if (userId === null) return;
-    const fetchCart = async () => {
-      try {
-        const response = await axios.get<{ cart: CartItem[] }>(
-          `http://localhost:5000/api/cart/getAllCartByIsDeletedFalse/${userId}`,
-          {
-            headers: { authorization: `Bearer ${token}` },
-          }
+    if (userId === null || !token) return;
+    setLoading(true);
+    axios
+      .get<{ cart?: { id: number }[] }>(
+        `http://localhost:5000/api/cart/getAllCartByIsDeletedFalse/${userId}`,
+        { headers: { authorization: `Bearer ${token}` } }
+      )
+      .then((res) => {
+        const carts = res.data.cart ?? [];
+        setCartId(carts.length > 0 ? carts[0].id : null);
+        setError(null);
+      })
+      .catch((err) => {
+        setError(
+          axios.isAxiosError(err) ? err.message : "Error fetching cart."
         );
-        setCartItems(response.data.cart);
-        console.log(response.data.cart);
-        
-      } catch (err) {
-        setError(axios.isAxiosError(err) ? err.message : "Error fetching cart.");
-      }
-    };
-    fetchCart();
+      })
+      .finally(() => setLoading(false));
   }, [userId, token]);
-
-  // Fetch product details for each cart item
   useEffect(() => {
-    if (cartItems.length === 0) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchProducts = async () => {
-      try {
-        const productEntries = await Promise.all(
-          cartItems.map(async (item) => {
-            const res = await axios.get<CartProduct>(
-              `http://localhost:5000/api/cartProduct/${item.id}`,
-              {
-                headers: { authorization: `Bearer ${token}` },
-              }
-            );
-            return [item.id, res.data] as [number, CartProduct];
-          })
+    if (cartId === null || !token) return;
+    setLoading(true);
+    axios
+      .get<{
+        result: Array<{
+          cartid: number;
+          productid: number;
+          product_title: string;
+          price: number;
+          images: string[];
+          size: string;
+          quantity: number;
+        }>;
+      }>(`http://localhost:5000/api/cartProduct/cart/${cartId}`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const items = res.data.result;
+        setCartItems(
+          items.map(({ productid, quantity }) => ({ productid, quantity }))
         );
-        setCartProducts(Object.fromEntries(productEntries));
-      } catch (err) {
-        setError(axios.isAxiosError(err) ? err.message : "Error fetching products.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [cartItems, token]);
-
-  // Cart actions
-  const increaseQuantity = (id: number) =>
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+        setCartProductList(
+          items.map((item) => ({
+            id: item.productid,
+            title: item.product_title,
+            price: item.price,
+            size: item.size,
+            image: item.images,
+          }))
+        );
+        setError(null);
+      })
+      .catch((err) => {
+        setError(axios.isAxiosError(err) ? err.message : "Error loading cart.");
+      })
+      .finally(() => setLoading(false));
+  }, [cartId, token]);
+  const handleQuantityChange = (productId: number, qty: number) => {
+    if (qty < 1) return;
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.productid === productId ? { ...item, quantity: qty } : item
       )
-    );
-
-  const decreaseQuantity = (id: number) =>
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id && item.quantity > 0
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
-
-  const changeQuantity = (id: number, value: string) => {
-    const qty = Math.max(0, Number(value));
-    if (isNaN(qty)) return;
-    setCartItems((items) =>
-      items.map((item) => (item.id === id ? { ...item, quantity: qty } : item))
     );
   };
-
-  const removeItem = (id: number) =>
-    setCartItems((items) => items.filter((item) => item.id !== id));
-
+  const handleRemove = async (productId: number) => {
+    if (!cartId || !token) return;
+    setDeletingProductId(productId);
+    const previousCartItems = [...cartItems];
+    const previousCartProductList = [...cartProductList];
+    setCartItems((prev) => prev.filter((item) => item.productid !== productId));
+    setCartProductList((prev) => prev.filter((p) => p.id !== productId));
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/cartProduct/${cartId}/${productId}`,
+        {
+          headers: { authorization: `Bearer ${token}` },
+        }
+      );
+    } catch (error) {
+      console.error("Failed to delete item from cart:", error);
+      alert("Failed to remove item. Reverting changes.");
+      setCartItems(previousCartItems);
+      setCartProductList(previousCartProductList);
+    } finally {
+      setDeletingProductId(null);
+    }
+  };
   const totalPrice = cartItems.reduce((sum, item) => {
-    const product = cartProducts[item.id];
-    return sum + (product?.price ?? 0) * item.quantity;
+    const product = cartProductList.find((p) => p.id === item.productid);
+    return product ? sum + product.price * item.quantity : sum;
   }, 0);
-
-  if (loading) {
-    return (
-      <MDBContainer className="py-5 text-center">
-        <MDBTypography tag="h5">Loading cart...</MDBTypography>
-      </MDBContainer>
-    );
-  }
-
-  if (error) {
-    return (
-      <MDBContainer className="py-5 text-center">
-        <MDBTypography tag="h5" className="text-danger">
-          {error}
-        </MDBTypography>
-      </MDBContainer>
-    );
-  }
-
-  if (cartItems.length === 0) {
-    return (
-      <MDBContainer className="py-5 text-center">
-        <MDBTypography tag="h5">Your cart is empty.</MDBTypography>
-      </MDBContainer>
-    );
-  }
-
   return (
-    <section className="h-100 gradient-custom">
-      <MDBContainer className="py-5 h-100">
-        <MDBRow className="justify-content-center my-4">
-          <MDBCol md="8">
-            <MDBCard className="mb-4">
-              <MDBCardHeader>
-                <MDBTypography tag="h5">
-                  Cart - {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
-                </MDBTypography>
-              </MDBCardHeader>
-              <MDBCardBody>
-                {cartItems.map((item) => {
-                  const product = cartProducts[item.id];
-                  if (!product) return null;
-
-                  return (
-                    <MDBRow key={item.id} className="mb-4">
-                      <MDBCol lg="3" md="12" className="mb-4 mb-lg-0">
-                        <MDBRipple rippleColor="light">
-                          <img
-                            src={product.image ?? "https://via.placeholder.com/150"}
-                            className="w-100"
-                            alt={product.title}
-                          />
-                        </MDBRipple>
-                      </MDBCol>
-
-                      <MDBCol lg="5" md="6">
-                        <p><strong>{product.title}</strong></p>
-                        <p>Color: {product.color}</p>
-                        <p>Size: {product.size}</p>
-                        <MDBTooltip title="Remove item">
-                          <MDBIcon
-                            fas
-                            icon="trash"
-                            role="button"
-                            onClick={() => removeItem(item.id)}
-                          />
-                        </MDBTooltip>
-                      </MDBCol>
-
-                      <MDBCol lg="4" md="6">
-                        <div className="d-flex mb-4" style={{ maxWidth: "300px" }}>
-                          <MDBBtn className="px-3 me-2" onClick={() => decreaseQuantity(item.id)}>
-                            <MDBIcon fas icon="minus" />
-                          </MDBBtn>
-
-                          <MDBInput
-                            value={item.quantity}
-                            type="number"
-                            label="Qty"
-                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                              changeQuantity(item.id, e.target.value)
-                            }
-                            style={{ width: "60px" }}
-                          />
-
-                          <MDBBtn className="px-3 ms-2" onClick={() => increaseQuantity(item.id)}>
-                            <MDBIcon fas icon="plus" />
-                          </MDBBtn>
-                        </div>
-
-                        <p className="text-start text-md-center">
-                          <strong>${(product.price * item.quantity).toFixed(2)}</strong>
-                        </p>
-                      </MDBCol>
-                    </MDBRow>
-                  );
-                })}
-                <hr />
-              </MDBCardBody>
-            </MDBCard>
-          </MDBCol>
-
-          <MDBCol md="4">
-            <MDBCard className="mb-4">
-              <MDBCardHeader>
-                <MDBTypography tag="h5">Summary</MDBTypography>
-              </MDBCardHeader>
-              <MDBCardBody>
-                <MDBListGroup flush>
-                  <MDBListGroupItem className="d-flex justify-content-between">
-                    Products <span>${totalPrice.toFixed(2)}</span>
-                  </MDBListGroupItem>
-                  <MDBListGroupItem className="d-flex justify-content-between">
-                    Shipping <span>Gratis</span>
-                  </MDBListGroupItem>
-                  <MDBListGroupItem className="d-flex justify-content-between">
-                    <div><strong>Total amount</strong></div>
-                    <span><strong>${totalPrice.toFixed(2)}</strong></span>
-                  </MDBListGroupItem>
-                </MDBListGroup>
-                <MDBBtn block size="lg">Go to checkout</MDBBtn>
-              </MDBCardBody>
-            </MDBCard>
-          </MDBCol>
-        </MDBRow>
-      </MDBContainer>
-    </section>
+    <Paper
+      elevation={3}
+      sx={{
+        width: "100vw",
+        height: "100vh",
+        p: 3,
+        borderRadius: 0,
+        background: "linear-gradient(to bottom, #C8FACC, #5F7F67)",
+        overflowY: "auto",
+      }}
+    >
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        sx={{ textAlign: "center", fontWeight: "bold", mb: 4 }}
+      >
+         Shopping Cart
+      </Typography>
+      {loading && <CircularProgress />}
+      {error && (
+        <Typography variant="body2" color="error" mb={2}>
+          {error}
+        </Typography>
+      )}
+      <Grid container spacing={4} justifyContent="center">
+        <Grid item xs={12} md={8}>
+          {cartProductList.length === 0 && !loading && (
+            <Typography>Your cart is empty.</Typography>
+          )}
+          <Stack spacing={2}>
+            {cartProductList.map((product) => {
+              const cartItem = cartItems.find(
+                (item) => item.productid === product.id
+              );
+              if (!cartItem) return null;
+              return (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Card
+                    sx={{
+                      display: "flex",
+                      width: "50vw",
+                      height: "20vh",
+                      alignItems: "center",
+                      p: 1.5,
+                      borderRadius: 3,
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      transition: "box-shadow 0.3s ease",
+                      "&:hover": {
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                      },
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={`images/${product.image[0]}`}
+                      alt={product.title}
+                      sx={{
+                        width: 130,
+                        height: 130,
+                        borderRadius: 2,
+                        objectFit: "cover",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <CardContent
+                      sx={{ flexGrow: 1, pl: 2, "&:last-child": { pb: 0 } }}
+                    >
+                      <Typography variant="h6" fontWeight={600}>
+                        {product.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        gutterBottom
+                      >
+                        Size: {product.size}
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        color="primary"
+                        fontWeight={700}
+                      >
+                        ${product.price.toFixed(2)}
+                      </Typography>
+                    </CardContent>
+                    <CardActions
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                        pr: 1,
+                      }}
+                    >
+                      <TextField
+                        type="number"
+                        size="small"
+                        value={cartItem.quantity}
+                        onChange={(e) =>
+                          handleQuantityChange(
+                            product.id,
+                            Number(e.target.value)
+                          )
+                        }
+                        inputProps={{ min: 1, style: { width: 70 } }}
+                      />
+                      <IconButton
+                        aria-label="Remove item"
+                        color="error"
+                        onClick={() => handleRemove(product.id)}
+                        disabled={deletingProductId === product.id}
+                      >
+                        {deletingProductId === product.id ? (
+                          <CircularProgress size={24} color="inherit" />
+                        ) : (
+                          <DeleteIcon />
+                        )}
+                      </IconButton>
+                    </CardActions>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </Stack>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <Paper
+              elevation={3}
+              sx={{
+                width: "25vw",
+                p: 3,
+                borderRadius: 3,
+                backgroundColor: "#F5F5F5",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                transition: "box-shadow 0.3s ease",
+                "&:hover": {
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                 Order Summary
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 1.5 }}>
+                Total Items:{" "}
+                <strong>
+                  {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+                </strong>
+              </Typography>
+              <Typography
+                variant="h5"
+                color="primary"
+                fontWeight={700}
+                sx={{ mb: 3 }}
+              >
+                Total: ${totalPrice.toFixed(2)}
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                size="large"
+                disabled={cartProductList.length === 0}
+                onClick={() => alert("Proceed to checkout")}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: "bold",
+                  py: 1.5,
+                }}
+              >
+                 Checkout
+              </Button>
+            </Paper>
+          </motion.div>
+        </Grid>
+      </Grid>
+    </Paper>
   );
-}
+};
+export default ShoppingCart;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
