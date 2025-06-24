@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import JWT from "jsonwebtoken";
 import dotenv from "dotenv";
 import passport from "passport";
-
+ 
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET!;
