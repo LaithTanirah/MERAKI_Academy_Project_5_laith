@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import useAdminAuth from "@/hooks/useAdminAuth";
 import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
-import { CssBaseline, AppBar, Toolbar, IconButton, Typography } from "@mui/material";
+import { CssBaseline, AppBar, Toolbar, IconButton, Typography, CircularProgress, Box } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -12,15 +12,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-//   useEffect(() => {
-//     if (isAdmin === false) {
-//       router.replace("/");
-//     }
-//   }, [isAdmin, router]);
+  useEffect(() => {
+    if (isAdmin === false) {
+      router.replace("/");
+    }
+  }, [isAdmin, router]);
 
-//   if (isAdmin === null) {
-//     return <p>Checking...</p>;
-//   }
+  if (isAdmin === null) {
+    return (
+      <Box minHeight="100vh" display="flex" justifyContent="center" alignItems="center">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -42,4 +46,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </>
   );
 }
-

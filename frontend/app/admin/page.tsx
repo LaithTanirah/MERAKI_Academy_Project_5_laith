@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -11,9 +10,7 @@ import {
   CardContent,
   Button,
   Divider,
-  Tooltip,
   Avatar,
-  Grid,
   IconButton,
 } from "@mui/joy";
 import Link from "next/link";
@@ -30,16 +27,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import { motion } from "framer-motion";
 
 export default function AdminDashboardPage() {
-  const isAdmin = useAdminAuth();
-  const router = useRouter();
-
-  // 
-  // useEffect(() => {
-  //   if (isAdmin === false) {
-  //     router.replace("/");
-  //   }
-  // }, [isAdmin, router]);
-
   return (
     <CssVarsProvider>
       <Box
@@ -53,7 +40,6 @@ export default function AdminDashboardPage() {
           alignItems: "center",
         }}
       >
-        {/* 🔧 Profile button */}
         <Box sx={{ position: "absolute", top: 16, right: 16 }}>
           <IconButton>
             <Avatar variant="outlined">
@@ -71,17 +57,14 @@ export default function AdminDashboardPage() {
           Admin Dashboard
         </Typography>
 
-        {/* ✅ KPIs */}
         <Box mb={4} width="100%" maxWidth="1000px">
           <KpiCards />
         </Box>
 
-        {/* ✅ Charts Section */}
         <Box mb={4} width="100%" maxWidth="1000px">
           <DashboardCharts />
         </Box>
 
-        {/* 🔥 Recent Activity */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -90,7 +73,12 @@ export default function AdminDashboardPage() {
         >
           <Card
             variant="outlined"
-            sx={{ p: 3, backgroundColor: "#ffffff", borderRadius: "xl", boxShadow: "md" }}
+            sx={{
+              p: 3,
+              backgroundColor: "#ffffff",
+              borderRadius: "xl",
+              boxShadow: "md",
+            }}
           >
             <Typography level="title-lg" mb={2} color="success.700">
               Recent Activity
@@ -103,17 +91,20 @@ export default function AdminDashboardPage() {
               </Box>
               <Box display="flex" alignItems="center" gap={2}>
                 <ErrorOutlineIcon sx={{ color: "#c62828" }} />
-                <Typography>❌ Product out of stock: Vitamin D - 3 hours ago</Typography>
+                <Typography>
+                  ❌ Product out of stock: Vitamin D - 3 hours ago
+                </Typography>
               </Box>
               <Box display="flex" alignItems="center" gap={2}>
                 <UpdateIcon sx={{ color: "#0277bd" }} />
-                <Typography>🔄 Category updated: Supplements - 5 hours ago</Typography>
+                <Typography>
+                  🔄 Category updated: Supplements - 5 hours ago
+                </Typography>
               </Box>
             </Box>
           </Card>
         </motion.div>
 
-        {/* ✅ Action Cards */}
         <Box
           display="grid"
           gap={3}
@@ -122,8 +113,11 @@ export default function AdminDashboardPage() {
           gridTemplateColumns="repeat(auto-fit, minmax(280px, 1fr))"
           mt={6}
         >
-          {/* Products */}
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <Card
               variant="outlined"
               sx={{
@@ -135,7 +129,12 @@ export default function AdminDashboardPage() {
                 "&:hover": { transform: "scale(1.02)" },
               }}
             >
-              <Box display="flex" justifyContent="center" mb={2} color="success.700">
+              <Box
+                display="flex"
+                justifyContent="center"
+                mb={2}
+                color="success.700"
+              >
                 <Inventory2Icon sx={{ fontSize: 40 }} />
               </Box>
               <CardContent>
@@ -164,8 +163,11 @@ export default function AdminDashboardPage() {
             </Card>
           </motion.div>
 
-          {/* Categories */}
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+          >
             <Card
               variant="outlined"
               sx={{
@@ -177,7 +179,12 @@ export default function AdminDashboardPage() {
                 "&:hover": { transform: "scale(1.02)" },
               }}
             >
-              <Box display="flex" justifyContent="center" mb={2} color="success.700">
+              <Box
+                display="flex"
+                justifyContent="center"
+                mb={2}
+                color="success.700"
+              >
                 <CategoryIcon sx={{ fontSize: 40 }} />
               </Box>
               <CardContent>
@@ -206,8 +213,11 @@ export default function AdminDashboardPage() {
             </Card>
           </motion.div>
 
-          {/* Delivery */}
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
             <Card
               variant="outlined"
               sx={{
@@ -227,7 +237,8 @@ export default function AdminDashboardPage() {
                   Delivery
                 </Typography>
                 <Typography level="body-sm" textAlign="center" mb={1}>
-                  Configure delivery zones, fees, and methods here once available.
+                  Configure delivery zones, fees, and methods here once
+                  available.
                 </Typography>
                 <Button disabled fullWidth>
                   🚚 Coming Soon
