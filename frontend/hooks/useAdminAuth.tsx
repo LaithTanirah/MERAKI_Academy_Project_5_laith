@@ -24,7 +24,7 @@ export default function useAdminAuth() {
     } catch (err) {
       console.error("Auth error", err);
       setIsAdmin(false);
-    }
+    } 
   }, []);
 
   return isAdmin;
