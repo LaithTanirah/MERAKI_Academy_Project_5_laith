@@ -1,4 +1,3 @@
-
 "use client";
 import { useEffect, useState } from "react";
 
@@ -16,23 +15,17 @@ export default function useAdminAuth() {
 
     try {
       const user = JSON.parse(userJson);
-      if (user.id !== 18) {
+      
+      if (user.email === "AvocadoAdmin@gmail.com" && user.role_id === 1) {
+        setIsAdmin(true);
+      } else {
         setIsAdmin(false);
-        return;
       }
-
-      setIsAdmin(true);
-    } catch {
+    } catch (err) {
+      console.error("Auth error", err);
       setIsAdmin(false);
     }
   }, []);
 
   return isAdmin;
 }
-      /* 
-    /* 
-    Admin =18
-    {
-    "email": "AvocadoTeam@gmail.com",
-  "password": "Avo"
-} */

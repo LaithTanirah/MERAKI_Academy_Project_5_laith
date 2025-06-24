@@ -1,4 +1,6 @@
+// src/app/auth/layout.tsx
 "use client";
+
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -16,7 +18,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function AuthSplitLayout() {
   const [showRegister, setShowRegister] = useState(false);
@@ -25,7 +27,6 @@ export default function AuthSplitLayout() {
   const [modalMessage, setModalMessage] = useState("");
 
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
-
   const [registerForm, setRegisterForm] = useState({
     first_name: "",
     last_name: "",
@@ -35,14 +36,30 @@ export default function AuthSplitLayout() {
   });
 
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+  // Handle Google OAuth callback
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) {
       localStorage.setItem("token", token);
-      showModal("Success", "Logged in with Google successfully!");
+      // Fetch user profile after OAuth
+      axios
+        .get(`${API}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+          showModal("Success", "Logged in with Google successfully!");
+          // Redirect to homepage first
+          router.push("/");
+        })
+        .catch(() => {
+          showModal("Error", "Could not fetch user data");
+        });
     }
-  }, [searchParams]);
+  }, [searchParams, API, router]);
 
   const showModal = (title: string, message: string) => {
     setModalTitle(title);
@@ -60,34 +77,35 @@ export default function AuthSplitLayout() {
     setRegisterForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Traditional login
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        loginForm
-      );
+      const { data } = await axios.post(`${API}/api/auth/login`, loginForm);
+      // store token and user
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       showModal("Success", "Login successful!");
+      // redirect to homepage first
+      router.push("/");
     } catch (err: any) {
-      showModal("Error", err.response?.data?.message || "Login failed");
+      showModal("Error", err.response?.data?.error || "Login failed");
     }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/auth/register", registerForm);
+      await axios.post(`${API}/api/auth/register`, registerForm);
       showModal("Success", "Registration successful!");
       setShowRegister(false);
     } catch (err: any) {
-      showModal("Error", err.response?.data?.message || "Registration failed");
+      showModal("Error", err.response?.data?.error || "Registration failed");
     }
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
-    console.log(window.location.href);
+    window.location.href = `${API}/api/auth/google`;
   };
 
   return (
@@ -95,7 +113,7 @@ export default function AuthSplitLayout() {
       sx={{
         minHeight: "100vh",
         backgroundImage:
-          "linear-gradient(rgba(110, 255, 134, 0.5), rgba(55, 68, 51, 0.5))",
+          "linear-gradient(rgba(110,255,134,0.5),rgba(55,68,51,0.5))",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -114,6 +132,7 @@ export default function AuthSplitLayout() {
         }}
       >
         <Grid container>
+          {/* Left side: Login or transition */}
           <Grid
             item
             xs={12}
@@ -125,7 +144,6 @@ export default function AuthSplitLayout() {
               justifyContent: "center",
               alignItems: "center",
               p: 6,
-              height: "100%",
             }}
           >
             <AnimatePresence mode="wait">
@@ -148,20 +166,17 @@ export default function AuthSplitLayout() {
                     variant="contained"
                     sx={{
                       mt: 4,
-                      backgroundColor: "#4caf5",
+                      backgroundColor: "#4caf50",
                       color: "#fff",
                       fontWeight: "bold",
                       px: 4,
                       py: 1,
-                      fontSize: "1rem",
                       borderRadius: 2,
                       boxShadow: "4px 4px 10px rgba(0,0,0,0.2)",
-                      "&:hover": {
-                        backgroundColor: "#45a049",
-                      },
+                      "&:hover": { backgroundColor: "#45a049" },
                     }}
                   >
-                    Login
+                    LOGIN
                   </Button>
                 </motion.div>
               ) : (
@@ -175,7 +190,6 @@ export default function AuthSplitLayout() {
                   <Typography variant="h3" fontWeight="bold" gutterBottom>
                     Login
                   </Typography>
-
                   <Box
                     component="form"
                     onSubmit={handleLoginSubmit}
@@ -209,16 +223,13 @@ export default function AuthSplitLayout() {
                       sx={{
                         mt: 4,
                         py: 1.5,
-                        fontWeight: "bold",
-                        fontSize: "1rem",
                         backgroundColor: "#4caf50",
                         "&:hover": { backgroundColor: "#45a049" },
                         boxShadow: "4px 4px 10px rgba(0,0,0,0.2)",
                       }}
                     >
-                      Login
+                      LOGIN
                     </Button>
-
                     <Button
                       onClick={handleGoogleLogin}
                       fullWidth
@@ -226,15 +237,9 @@ export default function AuthSplitLayout() {
                       sx={{
                         mt: 2,
                         py: 1.5,
-                        fontWeight: "bold",
-                        fontSize: "1rem",
                         color: "#4285F4",
                         borderColor: "#4285F4",
-                        boxShadow: "2px 2px 8px rgba(0,0,0,0.1)",
-                        "&:hover": {
-                          backgroundColor: "#f5f5f5",
-                          borderColor: "#4285F4",
-                        },
+                        "&:hover": { backgroundColor: "#f5f5f5" },
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -246,7 +251,7 @@ export default function AuthSplitLayout() {
                         alt="Google"
                         style={{ width: 20, height: 20 }}
                       />
-                      Login with Google
+                      LOGIN WITH GOOGLE
                     </Button>
                   </Box>
                 </motion.div>
@@ -254,6 +259,7 @@ export default function AuthSplitLayout() {
             </AnimatePresence>
           </Grid>
 
+          {/* Right side: Signup prompt or form */}
           <Grid
             item
             xs={12}
@@ -281,7 +287,6 @@ export default function AuthSplitLayout() {
                   <Typography variant="h3" fontWeight="bold">
                     Register
                   </Typography>
-
                   <Box
                     component="form"
                     onSubmit={handleRegisterSubmit}
@@ -295,7 +300,7 @@ export default function AuthSplitLayout() {
                       variant="filled"
                       value={registerForm.first_name}
                       onChange={handleRegisterChange}
-                      sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
                     />
                     <TextField
                       label="Last Name"
@@ -305,7 +310,7 @@ export default function AuthSplitLayout() {
                       variant="filled"
                       value={registerForm.last_name}
                       onChange={handleRegisterChange}
-                      sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
                     />
                     <TextField
                       label="Email"
@@ -315,7 +320,7 @@ export default function AuthSplitLayout() {
                       variant="filled"
                       value={registerForm.email}
                       onChange={handleRegisterChange}
-                      sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
                     />
                     <TextField
                       label="Password"
@@ -326,7 +331,7 @@ export default function AuthSplitLayout() {
                       variant="filled"
                       value={registerForm.password}
                       onChange={handleRegisterChange}
-                      sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
                     />
                     <TextField
                       label="Phone Number"
@@ -336,7 +341,7 @@ export default function AuthSplitLayout() {
                       variant="filled"
                       value={registerForm.phone_number}
                       onChange={handleRegisterChange}
-                      sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
                     />
                     <Button
                       type="submit"
@@ -345,15 +350,11 @@ export default function AuthSplitLayout() {
                       sx={{
                         mt: 4,
                         py: 1.5,
-                        fontWeight: "bold",
-                        fontSize: "1rem",
-                        backgroundColor: "#ffffff",
+                        backgroundColor: "#fff",
                         color: "#4caf50",
-                        "&:hover": { backgroundColor: "#e8f5e9" },
-                        boxShadow: "4px 4px 10px rgba(0,0,0,0.2)",
                       }}
                     >
-                      Register
+                      SIGNUP
                     </Button>
                   </Box>
                 </motion.div>
@@ -376,20 +377,14 @@ export default function AuthSplitLayout() {
                     variant="contained"
                     sx={{
                       mt: 4,
-                      backgroundColor: "#ffffff",
+                      backgroundColor: "#fff",
                       color: "#4caf50",
                       fontWeight: "bold",
                       px: 4,
                       py: 1,
-                      fontSize: "1rem",
-                      borderRadius: 2,
-                      boxShadow: "4px 4px 10px rgba(0,0,0,0.2)",
-                      "&:hover": {
-                        backgroundColor: "#e8f5e9",
-                      },
                     }}
                   >
-                    Signup
+                    SIGNUP
                   </Button>
                 </motion.div>
               )}
@@ -400,18 +395,9 @@ export default function AuthSplitLayout() {
 
       <Dialog
         open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          if (modalTitle.toLowerCase().includes("success")) {
-          }
-        }}
+        onClose={() => setModalOpen(false)}
         PaperProps={{
-          sx: {
-            borderRadius: 3,
-            p: 3,
-            minWidth: 300,
-            textAlign: "center",
-          },
+          sx: { borderRadius: 3, p: 3, minWidth: 300, textAlign: "center" },
         }}
       >
         {modalTitle.toLowerCase().includes("success") ? (
@@ -437,26 +423,18 @@ export default function AuthSplitLayout() {
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center" }}>
           <Button
-            onClick={() => {
-              setModalOpen(false);
-              if (modalTitle.toLowerCase().includes("success")) {
-              }
-            }}
+            onClick={() => setModalOpen(false)}
             variant="contained"
             sx={{
               mt: 2,
               px: 4,
               py: 1,
-              borderRadius: 2,
-              backgroundColor: modalTitle.toLowerCase().includes("success")
+              backgroundColor: modalTitle
+                .toLowerCase()
+                .includes("success")
                 ? "green"
                 : "red",
               color: "#fff",
-              "&:hover": {
-                backgroundColor: modalTitle.toLowerCase().includes("success")
-                  ? "#2e7d32"
-                  : "#c62828",
-              },
             }}
           >
             OK

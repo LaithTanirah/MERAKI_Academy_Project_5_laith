@@ -10,7 +10,6 @@ import CardActions from "@mui/material/CardActions";
 import Button from "@mui/material/Button";
 import Link from "next/link";
 
-
 interface ProductCardProps {
   id: string;
   title: string;
