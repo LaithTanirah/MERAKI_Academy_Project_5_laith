@@ -20,11 +20,14 @@ import {
   Cancel,
   KeyboardArrowDown,
   KeyboardArrowUp,
-  ShoppingCart,
+  ShoppingCart as CartIcon,
 } from "@mui/icons-material";
 import { styled } from "@mui/system";
 import { Theme } from "@mui/material/styles";
 import { format } from "date-fns";
+
+// Set the base URL for all axios requests
+axios.defaults.baseURL = "http://localhost:5000/api";
 
 interface TokenPayload {
   userId: number;
@@ -43,24 +46,21 @@ interface Order {
   cart_id: number;
   user_id: number;
   products: Product[];
-  status?: string;
-  date?: string | Date;
-  total?: number;
+  status: string;
+  date: string | Date;
+  total: number;
 }
 
-interface OrderResponse {
-  result: Order[];
-}
-
+// Styled components for order and product rows
 const OrderCard = styled(Paper)(({ theme }: { theme: Theme }) => ({
   padding: theme.spacing(3),
   marginBottom: theme.spacing(3),
   borderRadius: theme.spacing(2),
   boxShadow: theme.shadows[3],
   animation: "fadeInUp 500ms ease-out",
-  "@keyframes fadeInUp": {
-    "0%": { opacity: 0, transform: "translateY(10px)" },
-    "100%": { opacity: 1, transform: "translateY(0)" },
+  '@keyframes fadeInUp': {
+    '0%': { opacity: 0, transform: 'translateY(10px)' },
+    '100%': { opacity: 1, transform: 'translateY(0)' },
   },
 }));
 
@@ -73,11 +73,10 @@ const ProductRow = styled(Box)(({ theme }: { theme: Theme }) => ({
   backgroundColor: theme.palette.grey[100],
   alignItems: "center",
   boxShadow: theme.shadows[1],
-  "&:last-child": {
-    marginBottom: 0,
-  },
+  "&:last-child": { marginBottom: 0 },
 }));
 
+// Configuration for status badges
 const statusConfig: Record<
   string,
   { color: "primary" | "success" | "warning" | "error"; icon: JSX.Element }
@@ -89,163 +88,108 @@ const statusConfig: Record<
 };
 
 const Orders: React.FC = () => {
+  const [token, setToken] = useState<string | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [openRow, setOpenRow] = useState<number | null>(null);
 
+  // Load JWT from localStorage
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = jwtDecode<TokenPayload>(token);
-        const parsedUserId = Number(decoded.userId);
-        setUserId(!isNaN(parsedUserId) ? parsedUserId : null);
-      } catch (err) {
-        console.error("Invalid token:", err);
-        setUserId(null);
-      }
-    } else {
-      setUserId(null);
-    }
+    const t = localStorage.getItem("token");
+    if (t) setToken(t);
   }, []);
 
+  // Decode token to extract userId
   useEffect(() => {
-    if (!userId) return;
+    if (!token) return;
+    try {
+      const decoded = jwtDecode<TokenPayload>(token);
+      setUserId(decoded.userId);
+    } catch {
+      setUserId(null);
+    }
+  }, [token]);
 
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get<OrderResponse>(
-          `http://localhost:5000/api/cartProduct/order/${userId}`
-        );
-
-        const ordersWithExtras = response.data.result.map((order) => {
-          const total = order.products.reduce(
-            (acc, p) => acc + p.price * p.quantity,
-            0
-          );
-          return {
-            ...order,
-            total,
-            status: order.status || "Processing",
-            date: order.date ? new Date(order.date) : new Date(),
-          };
+  // Fetch orders for the authenticated user
+  useEffect(() => {
+    if (userId === null || !token) return;
+    axios
+      .get<{ result: Order[] }>(`/cartProduct/order/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        // Enrich orders with total, default status and date
+        const enriched = res.data.result.map((o) => {
+          const status = o.status && statusConfig[o.status] ? o.status : "Processing";
+          const date = o.date ? new Date(o.date) : new Date();
+          const total = o.products?.reduce((sum, p) => sum + (p.price || 0) * (p.quantity || 0), 0) || 0;
+          return { ...o, status, date, total };
         });
+        setOrders(enriched);
+      })
+      .catch((err) => console.error("Failed to fetch orders:", err));
+  }, [userId, token]);
 
-        setOrders(ordersWithExtras);
-      } catch (error) {
-        console.error("Failed to fetch orders:", error);
-      }
-    };
-
-    fetchOrders();
-  }, [userId]);
-
-  const toggleRow = (cartId: number) => {
-    setOpenRow((prev) => (prev === cartId ? null : cartId));
-  };
+  const toggleRow = (id: number) =>
+    setOpenRow((prev) => (prev === id ? null : id));
 
   return (
     <Box
       p={3}
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(to bottom, #C8FACC, #5F7F67)",
-      }}
+      sx={{ minHeight: "100vh", background: "linear-gradient(to bottom, #C8FACC, #5F7F67)" }}
     >
-      <Stack
-        direction="row"
-        justifyContent="center"
-        alignItems="center"
-        spacing={1}
-        mb={3}
-      >
-        <ShoppingCart fontSize="large" />
+      <Stack direction="row" justifyContent="center" alignItems="center" spacing={1} mb={3}>
+        <CartIcon fontSize="large" />
         <Typography variant="h4" fontWeight="bold">
           Your Orders
         </Typography>
       </Stack>
 
-      {orders.length === 0 && (
+      {orders.length === 0 ? (
         <Typography>No orders found for this user.</Typography>
-      )}
+      ) : (
+        orders.map((order, idx) => (
+          <OrderCard key={order.cart_id} sx={{ animationDelay: `${idx * 100}ms` }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={4}>
+              <Typography variant="h6" sx={{ fontFamily: "monospace" }}>
+                Order ID: {order.cart_id}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Date:</strong> {format(new Date(order.date), "MMM dd, yyyy")}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Total:</strong> ${order.total.toFixed(2)}
+              </Typography>
+              <Chip
+                icon={statusConfig[order.status]?.icon || <HourglassEmpty fontSize="small" />}
+                label={order.status}
+                color={statusConfig[order.status]?.color || "warning"}
+                variant="outlined"
+                sx={{ height: 32, fontWeight: 500 }}
+              />
+              <IconButton size="small" onClick={() => toggleRow(order.cart_id)}>
+                {openRow === order.cart_id ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+              </IconButton>
+            </Stack>
 
-      {orders.map((order, idx) => (
-        <OrderCard
-          key={order.cart_id}
-          sx={{ animationDelay: `${idx * 100}ms` }}
-        >
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            spacing={4}
-          >
-            <Typography variant="h6" sx={{ fontFamily: "monospace" }}>
-              Order ID: {order.cart_id}
-            </Typography>
-
-            <Typography variant="body2">
-              <strong>Customer:</strong> User {order.user_id}
-            </Typography>
-
-            <Typography variant="body2">
-              <strong>Date:</strong>{" "}
-              {order.date
-                ? format(new Date(order.date), "MMM dd, yyyy")
-                : "N/A"}
-            </Typography>
-
-            <Typography variant="body2">
-              <strong>Total:</strong> ${order.total?.toFixed(2) ?? "0.00"}
-            </Typography>
-
-            <Chip
-              icon={statusConfig[order.status || "Processing"]?.icon}
-              label={order.status || "Processing"}
-              color={statusConfig[order.status || "Processing"]?.color}
-              variant="outlined"
-              sx={{ height: 32, fontWeight: 500 }}
-            />
-
-            <IconButton size="small" onClick={() => toggleRow(order.cart_id)}>
-              {openRow === order.cart_id ? (
-                <KeyboardArrowUp />
-              ) : (
-                <KeyboardArrowDown />
-              )}
-            </IconButton>
-          </Stack>
-
-          <Collapse in={openRow === order.cart_id} timeout="auto" unmountOnExit>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle1" gutterBottom>
-              Products in this Order
-            </Typography>
-
-            <Box>
-              {order.products.map((product, index) => (
-                <ProductRow key={index}>
-                  <Typography variant="body1" sx={{ flex: 2 }}>
-                    {product.product_title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ flex: 1, textAlign: "center" }}
-                  >
-                    Qty: {product.quantity}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ flex: 1, textAlign: "right", fontWeight: 600 }}
-                  >
-                    ${product.price.toFixed(2)}
+            <Collapse in={openRow === order.cart_id} timeout="auto" unmountOnExit>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="subtitle1" gutterBottom>
+                Products in this Order
+              </Typography>
+              {order.products?.map((p, i) => (
+                <ProductRow key={i}>
+                  <Typography sx={{ flex: 2 }}>{p.product_title}</Typography>
+                  <Typography sx={{ flex: 1, textAlign: "center" }}>Qty: {p.quantity}</Typography>
+                  <Typography sx={{ flex: 1, textAlign: "right", fontWeight: 600 }}>
+                    ${p.price.toFixed(2)}
                   </Typography>
                 </ProductRow>
               ))}
-            </Box>
-          </Collapse>
-        </OrderCard>
-      ))}
+            </Collapse>
+          </OrderCard>
+        ))
+      )}
     </Box>
   );
 };

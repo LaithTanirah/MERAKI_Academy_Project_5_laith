@@ -221,4 +221,5 @@ module.exports = {
   deleteCartProduct,
   getDetailedCartProductsByCartId,
   getOrderFromCartProductsByUserId,
+  
 };
