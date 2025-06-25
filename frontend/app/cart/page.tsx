@@ -80,7 +80,6 @@ const ShoppingCart: React.FC = () => {
     setModalTitle(title);
     setModalMessage(message);
     setModalOpen(true);
-    modalOnCloseRef.current = onClose || null;
   };
 
   useEffect(() => {
