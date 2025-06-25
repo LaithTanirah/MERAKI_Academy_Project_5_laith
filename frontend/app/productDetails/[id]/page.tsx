@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import {
   Card,
@@ -50,6 +50,7 @@ interface TokenPayload {
 
 const ProductDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const [product, setProduct] = useState<ProductDetailsProps | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,14 +58,9 @@ const ProductDetailsPage: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [token, setToken] = useState<string | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
-  const [openModal, setOpenModal] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -126,6 +122,16 @@ const ProductDetailsPage: React.FC = () => {
       });
   }, [id]);
 
+  useEffect(() => {
+    if (modalOpen && modalTitle.toLowerCase().includes("success")) {
+      const timer = setTimeout(() => {
+        setModalOpen(false);
+        router.push("/cart");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [modalOpen, modalTitle, router]);
+
   if (loading)
     return (
       <Box display="flex" justifyContent="center" mt={6}>
@@ -159,6 +165,7 @@ const ProductDetailsPage: React.FC = () => {
         {
           cartId,
           productId,
+          size: selectedSize, // لو الباكند يدعم الحجم أضفها
         }
       );
 
@@ -384,8 +391,6 @@ const ProductDetailsPage: React.FC = () => {
         open={modalOpen}
         onClose={() => {
           setModalOpen(false);
-          if (modalTitle.toLowerCase().includes("success")) {
-          }
         }}
         PaperProps={{
           sx: {
@@ -422,6 +427,7 @@ const ProductDetailsPage: React.FC = () => {
             onClick={() => {
               setModalOpen(false);
               if (modalTitle.toLowerCase().includes("success")) {
+                router.push("/cart");
               }
             }}
             variant="contained"
