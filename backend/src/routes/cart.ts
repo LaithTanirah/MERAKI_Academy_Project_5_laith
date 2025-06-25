@@ -1,5 +1,6 @@
 import { Router } from "express";
 import authentication from "../middleware/authentication";
+import checkSuspended from "../middleware/checkSuspended";
 
 const {
   getAllCartByIsDeletedTrue,
@@ -42,12 +43,12 @@ cartRouter.put("/checkout/:cartId", authentication, checkoutCart);
 cartRouter.get("/unclaimed", authentication, getUnclaimedOrders);
 
 // Claim an order for processing
-cartRouter.put("/claim/:cartId", authentication, claimOrder);
+cartRouter.put("/claim/:cartId", authentication, checkSuspended, claimOrder);
 
 // Get orders assigned to a specific delivery person
-cartRouter.get("/delivery/:deliveryPersonId", authentication, getMyOrders);
+cartRouter.get("/delivery/:deliveryPersonId", authentication, checkSuspended, getMyOrders);
 
 // Mark an order as Delivered
-cartRouter.put("/deliver/:cartId", authentication, deliverOrder);
+cartRouter.put("/deliver/:cartId", authentication, checkSuspended, deliverOrder);
 
 export default cartRouter;
