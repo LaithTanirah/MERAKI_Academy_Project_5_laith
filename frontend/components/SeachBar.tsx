@@ -1,15 +1,23 @@
-// components/SearchBar.tsx
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { OutlinedInput, InputAdornment, IconButton } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import React, { useState } from "react";
+import {
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { useRouter } from "next/navigation";
 
 export default function SearchBar() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
+  const router = useRouter();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('search for', query);
+    if (query.trim()) {
+      router.push(`/search?query=${encodeURIComponent(query.trim())}`);
+    }
   };
 
   return (
@@ -27,9 +35,9 @@ export default function SearchBar() {
           </InputAdornment>
         }
         sx={{
-          bgcolor: 'common.white',
+          bgcolor: "common.white",
           borderRadius: 2,
-          '& .MuiOutlinedInput-notchedOutline': { border: 0 },
+          "& .MuiOutlinedInput-notchedOutline": { border: 0 },
         }}
       />
     </form>

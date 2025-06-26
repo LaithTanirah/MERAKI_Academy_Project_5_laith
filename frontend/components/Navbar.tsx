@@ -25,17 +25,20 @@ import Link from "next/link";
 import SearchBar from "./SeachBar";
 import CartButton from "./CartButton";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
+  const router = useRouter();
 
   const toggleDrawer = (open: boolean) => () => {
     setDrawerOpen(open);
   };
 
   const handleLogout = () => {
-    console.log("Logout clicked");
+    localStorage.clear();
+    router.push("/");
   };
 
   return (
@@ -50,7 +53,7 @@ export default function Navbar() {
         }}
       >
         <Toolbar sx={{ justifyContent: "space-between", minHeight: 72 }}>
-
+          {/* Menu + Logo */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <motion.div whileTap={{ scale: 0.9 }}>
               <IconButton
@@ -73,7 +76,7 @@ export default function Navbar() {
             <Typography
               variant="h5"
               component={Link}
-              href="/"
+              href="/home"
               sx={{
                 textDecoration: "none",
                 color: "#fff",
@@ -82,11 +85,11 @@ export default function Navbar() {
                 fontFamily: "'Poppins', sans-serif",
               }}
             >
-               Avocado
+              Avocado
             </Typography>
           </Box>
 
-
+          {/* Search Bar */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -96,43 +99,27 @@ export default function Navbar() {
             <SearchBar />
           </motion.div>
 
-
+          {/* Icons */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             {[
-              ["/favorites", <FavoriteBorderIcon key="f" />],
-              [null, <CartButton key="c" />],
-            ].map(([href, Icon], idx) =>
-              href ? (
-                <Link key={idx} href={""} passHref legacyBehavior>
-                  <IconButton
-                    component="a"
-                    color="inherit"
-                    sx={{
-                      bgcolor: alpha("#fff", 0.1),
-                      borderRadius: 2,
-                      transition: "all 0.3s",
-                      "&:hover": { bgcolor: alpha("#fff", 0.2) },
-                    }}
-                  >
-                    {Icon}
-                  </IconButton>
-                </Link>
-              ) : (
-                <motion.div key={idx} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
-                  <IconButton
-                    color="inherit"
-                    sx={{
-                      bgcolor: alpha("#fff", 0.1),
-                      borderRadius: 2,
-                      transition: "all 0.3s",
-                      "&:hover": { bgcolor: alpha("#fff", 0.2) },
-                    }}
-                  >
-                    {Icon}
-                  </IconButton>
-                </motion.div>
-              )
-            )}
+              ["/FavoriteProducts", <FavoriteBorderIcon key="f" />],
+              ["/cart", <CartButton key="c" />],
+            ].map(([href, Icon], idx) => (
+              <motion.div key={idx} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
+                <IconButton
+                  onClick={() => router.push(href!)}
+                  color="inherit"
+                  sx={{
+                    bgcolor: alpha("#fff", 0.1),
+                    borderRadius: 2,
+                    transition: "all 0.3s",
+                    "&:hover": { bgcolor: alpha("#fff", 0.2) },
+                  }}
+                >
+                  {Icon}
+                </IconButton>
+              </motion.div>
+            ))}
 
             <motion.div whileHover={{ rotate: 20 }} whileTap={{ rotate: 0 }}>
               <IconButton
@@ -152,6 +139,7 @@ export default function Navbar() {
         </Toolbar>
       </AppBar>
 
+      {/* Drawer Menu */}
       <Drawer
         anchor="left"
         open={drawerOpen}
@@ -195,7 +183,7 @@ export default function Navbar() {
             <List>
               {[
                 { text: "Home", icon: <HomeIcon />, link: "/" },
-                { text: "Favorites", icon: <FavoriteBorderIcon />, link: "/favorites" },
+                { text: "Favorites", icon: <FavoriteBorderIcon />, link: "/FavoriteProducts" },
                 { text: "Contact Us", icon: <ContactMailIcon />, link: "/contact" },
               ].map(({ text, icon, link }) => (
                 <Link key={text} href={link} passHref legacyBehavior>
