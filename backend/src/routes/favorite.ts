@@ -1,5 +1,5 @@
 import { Router } from "express";
-
+import authentication from "../middleware/authentication";
 const {
   addFavorite,
   getFavoritesByUserId,
@@ -8,8 +8,8 @@ const {
 
 const favoriteRouter = Router();
 
-favoriteRouter.post("/", addFavorite);
-favoriteRouter.get("/:userId", getFavoritesByUserId); 
-favoriteRouter.delete("/delete/:id", deleteFavorite);
+favoriteRouter.post("/", authentication, addFavorite);
+favoriteRouter.get("/:userId", authentication, getFavoritesByUserId);
+favoriteRouter.delete("/delete/:id", authentication, deleteFavorite);
 
 export default favoriteRouter;

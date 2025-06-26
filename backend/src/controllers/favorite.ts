@@ -29,12 +29,26 @@ const addFavorite = (req: Request, res: Response): void => {
     });
 };
 
-
 // Get favorites by user ID
 const getFavoritesByUserId = (req: Request, res: Response): void => {
   const { userId } = req.params;
 
-  const query = `SELECT * FROM favorite WHERE userId = $1`;
+  const query = `SELECT
+                    f.userid,
+                    f.productid,
+                    p.title,
+                    p.description,
+                    p.price,
+                    p.size,
+                    p.images,
+                    p.categoryid
+                  FROM
+                    favorite f
+                  JOIN
+                    products p ON f.productid = p.id
+                  WHERE
+                    f.userid = $1;
+                  `;
 
   pool
     .query(query, [userId])
@@ -58,7 +72,7 @@ const getFavoritesByUserId = (req: Request, res: Response): void => {
 const deleteFavorite = (req: Request, res: Response): void => {
   const { id } = req.params;
 
-  const query = `DELETE FROM favorite WHERE id = $1`;
+  const query = `DELETE FROM favorite WHERE productid = $1`;
 
   pool
     .query(query, [id])
