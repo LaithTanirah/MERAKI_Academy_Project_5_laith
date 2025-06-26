@@ -478,7 +478,6 @@ export default function AuthSplitLayout() {
               <Link href="mailto:AvocadoAdmin@gmail.com" underline="hover">
                 AvocadoAdmin@gmail.com
               </Link>
-              
             </Typography>
             <Typography>📞 06 595 782</Typography>
           </Box>
