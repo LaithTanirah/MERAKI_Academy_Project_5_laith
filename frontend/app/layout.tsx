@@ -5,6 +5,7 @@ import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 import { CssVarsProvider } from '@mui/joy/styles';
 import { usePathname } from "next/navigation";
 import Navbar from "../components/Navbar";
+import ChatWidget from "../components/ChatWidget";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
@@ -34,6 +35,7 @@ export default function RootLayout({
         <ThemeProvider theme={theme}>
           <CssBaseline />
           {!hideNavbar && <Navbar />}
+          <ChatWidget /> 
           {children}
         </ThemeProvider>
       </body>
