@@ -36,7 +36,13 @@ export const getProductById = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const id = +req.params.id;
+  const id = Number(req.params.id);
+
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid product ID" });
+    return;
+  }
+
   try {
     const query = `
       SELECT
@@ -58,6 +64,7 @@ export const getProductById = async (
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 // POST /api/products
 export const createProduct = async (
   req: Request,
@@ -149,5 +156,39 @@ export const getProductsByCategory = async (
   } catch (error) {
     console.error("Get products by category error:", error);
     res.status(500).json({ error: "Failed to fetch products by category" });
+  }
+};
+
+// GET /api/products/search?query=...
+export const searchProducts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const queryText = req.query.query as string;
+
+  if (!queryText || queryText.trim() === "") {
+    console.log(queryText);
+    
+    res.status(400).json({ message: "Search query is required." });
+    return;
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT
+         p.id, p.title, p.description, p.price, p.size, p.images, p.categoryid,c.title AS category
+       FROM products p
+       JOIN category c ON p.categoryid = c.id
+       WHERE p.isdeleted = false AND (
+         LOWER(p.title) LIKE LOWER($1) OR
+         LOWER(p.description) LIKE LOWER($1)
+       )`,
+      [`%${queryText}%`]
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Search products error:", error);
+    res.status(500).json({ error: "Internal Server Error"});
   }
 };

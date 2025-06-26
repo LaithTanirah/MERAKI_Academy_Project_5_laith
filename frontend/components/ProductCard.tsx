@@ -92,7 +92,7 @@ export default function ProductCard({
       <CardActions sx={{ px: 2, pb: 2 }}>
         <Button
           component={Link}
-          href={`/products/${id}`}
+          href={`/productDetails/${id}`}
           size="medium"
           fullWidth
           variant="contained"

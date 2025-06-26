@@ -1,227 +1,493 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import NextLink from "next/link";
+import { useState, useEffect } from "react";
 import {
   Box,
+  Button,
+  Grid,
+  Paper,
+  TextField,
   Typography,
-  Container,
-  useTheme,
-  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Link,
 } from "@mui/material";
-import { motion } from "framer-motion";
-import Slider from "react-slick";
-import Categories from "../components/Categories";
-import WhyChoose from "../components/WhyChoose";
-import Footer from "../components/Footer";
 import axios from "axios";
-import { Product } from "../types/product";
+import { motion, AnimatePresence } from "framer-motion";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+import { useSearchParams, useRouter } from "next/navigation";
 
-export default function HomePage() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [products, setProducts] = useState<Product[]>([]);
+export default function AuthSplitLayout() {
+  // State to toggle between Login and Register screens
+  const [showRegister, setShowRegister] = useState(false);
 
+  // States for modal popup messages (success/error)
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
+
+  // Data for login and register forms
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [registerForm, setRegisterForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    password: "",
+    phone_number: "",
+  });
+
+  // Account suspension state
+  const [suspended, setSuspended] = useState(false);
+  const [showSuspensionModal, setShowSuspensionModal] = useState(false);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+  // Function to show the popup modal
+  const showModal = (title: string, message: string) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalOpen(true);
+  };
+
+  // Handle OAuth return from Google
   useEffect(() => {
-    axios.get("http://localhost:5000/api/products").then((result) => {
-      setProducts(result.data);
-    });
-  }, []);
+    const token = searchParams.get("token");
+    if (token) {
+      localStorage.setItem("token", token);
+      axios
+        .get(`${API}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+          showModal("Success", "Logged in with Google successfully!");
+          router.push("/home");
+        })
+        .catch(() => {
+          showModal("Error", "Could not fetch user data");
+        });
+    }
+  }, [searchParams, API, router]);
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 600,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    arrows: false,
+  // Update login form data on input change
+  const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Update register form data on input change
+  const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setRegisterForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Submit login data
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post(`${API}/api/auth/login`, loginForm);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      showModal("Success", "Login successful!");
+    } catch (err: any) {
+      // If account is suspended, show suspension modal instead of error dialog
+      if (
+        err.response?.status === 403 &&
+        (err.response.data.message?.toLowerCase().includes("suspend") ||
+          err.response.data.error?.toLowerCase().includes("suspend"))
+      ) {
+        setSuspended(true);
+        setShowSuspensionModal(true);
+        return;
+      }
+      showModal("Error", err.response?.data?.error || "Login failed");
+    }
+  };
+
+  // Submit registration data
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/api/auth/register`, registerForm);
+      showModal("Success", "Registration successful!");
+      setShowRegister(false);
+    } catch (err: any) {
+      showModal("Error", err.response?.data?.error || "Registration failed");
+    }
+  };
+
+  // Redirect to Google OAuth login
+  const handleGoogleLogin = () => {
+    window.location.href = `${API}/api/auth/google`;
   };
 
   return (
-    <main
-      style={{
-        backgroundImage:
-          "linear-gradient(rgba(110, 255, 134, 0.5), rgba(55, 68, 51, 0.5))",
+    <Box
+      sx={{
         minHeight: "100vh",
+        backgroundImage:
+          "linear-gradient(rgba(110,255,134,0.5),rgba(55,68,51,0.5))",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        p: 4,
       }}
     >
-      <Box
-        component="section"
+      <Paper
+        elevation={8}
         sx={{
-          backgroundImage: "linear-gradient(#4caf50, rgba(255, 255, 255, 0.7))",
-          color: "#fff",
-          py: { xs: 6, md: 12 },
-          textAlign: "center",
-          px: 2,
+          maxWidth: 835,
+          minHeight: 600,
+          width: "100%",
+          borderRadius: 3,
+          overflow: "hidden",
+          display: "flex",
         }}
       >
-        <Container maxWidth="md">
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <Typography
-              variant={isMobile ? "h4" : "h2"}
-              fontWeight="bold"
-              gutterBottom
-              sx={{ letterSpacing: 2 }}
-            >
-              Welcome to Avocado
-            </Typography>
-            <Typography
-              variant={isMobile ? "body1" : "h6"}
-              sx={{ mb: 4, opacity: 0.9 }}
-            >
-              Fresh, Healthy & Organic Products Delivered to Your Doorstep
-            </Typography>
-          </motion.div>
-        </Container>
-      </Box>
-
-      <Box component="section" sx={{ py: 8, bgcolor: "#e1f7e5" }}>
-        <Container maxWidth="lg">
-          <Typography
-            variant="h5"
-            fontWeight={600}
-            sx={{ mb: 4, textAlign: "center" }}
-          >
-            Categories You’ll Love
-          </Typography>
-          <Categories />
-        </Container>
-      </Box>
-
-      <Box
-        component="section"
-        sx={{
-          py: 4,
-          px: 0,
-          mt: 0,
-          bgcolor: "#e1f7e5",
-        }}
-      >
-        <Container maxWidth="lg" sx={{ px: { xs: 1, md: 0 } }}>
-          <Box
+        <Grid container>
+          {/* Left side: Login or welcome back message */}
+          <Grid
+            item
+            xs={12}
+            md={6}
             sx={{
-              borderRadius: 3,
-              overflow: "hidden",
-              border: "2px solid #ccc",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-              position: "relative",
-              "& .slick-dots": {
-                bottom: 10,
-                "& li": {
-                  margin: "0 6px",
-                  "& button": {
-                    "&:before": {
-                      fontSize: "10px",
-                      color: "#bbb",
-                      opacity: 1,
-                    },
-                  },
-                  "&.slick-active button:before": {
-                    color: theme.palette.primary.main,
-                  },
-                },
-              },
+              backgroundColor: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              p: 6,
             }}
           >
-            <Slider {...sliderSettings}>
-              {products.map((product: Product) => (
-                <NextLink
-                  key={product.id}
-                  href={`/category/${product.id}`}
-                  passHref
+            <AnimatePresence mode="wait">
+              {showRegister ? (
+                <motion.div
+                  key="login-welcome"
+                  initial={{ opacity: 0, x: -100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 100 }}
+                  transition={{ duration: 0.5 }}
                 >
-                  <Box
-                    component="a"
+                  <Typography variant="h3" fontWeight="bold" gutterBottom>
+                    Welcome Back!
+                  </Typography>
+                  <Typography variant="h6" sx={{ mt: 2 }}>
+                    Already have an account?
+                  </Typography>
+                  <Button
+                    onClick={() => setShowRegister(false)}
+                    variant="contained"
                     sx={{
-                      display: "block",
-                      position: "relative",
-                      height: { xs: 300, md: 450 },
-                      backgroundImage: `url(/images/${product.images[0]})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
+                      mt: 4,
+                      backgroundColor: "#4caf50",
                       color: "#fff",
-                      textDecoration: "none",
-                      cursor: "pointer",
+                      fontWeight: "bold",
+                      px: 4,
+                      py: 1,
+                      borderRadius: 2,
+                      boxShadow: "4px 4px 10px rgba(0,0,0,0.2)",
+                      "&:hover": { backgroundColor: "#45a049" },
                     }}
                   >
-                    <Box
+                    LOGIN
+                  </Button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="login-form"
+                  initial={{ opacity: 0, x: -100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 100 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Typography variant="h3" fontWeight="bold" gutterBottom>
+                    Login
+                  </Typography>
+                  <Box
+                    component="form"
+                    onSubmit={handleLoginSubmit}
+                    sx={{ width: "100%", maxWidth: 400 }}
+                  >
+                    <TextField
+                      label="Email"
+                      name="email"
+                      fullWidth
+                      margin="normal"
+                      variant="filled"
+                      value={loginForm.email}
+                      onChange={handleLoginChange}
+                      sx={{ bgcolor: "#eee", borderRadius: 1 }}
+                    />
+                    <TextField
+                      label="Password"
+                      name="password"
+                      type="password"
+                      fullWidth
+                      margin="normal"
+                      variant="filled"
+                      value={loginForm.password}
+                      onChange={handleLoginChange}
+                      sx={{ bgcolor: "#eee", borderRadius: 1 }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      fullWidth
                       sx={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        background: "rgba(0,0,0,0.4)",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        px: 2,
-                        textAlign: "center",
+                        mt: 4,
+                        py: 1.5,
+                        backgroundColor: "#4caf50",
+                        "&:hover": { backgroundColor: "#45a049" },
+                        boxShadow: "4px 4px 10px rgba(0,0,0,0.2)",
                       }}
                     >
-                      <Typography
-                        variant="h4"
-                        fontWeight={700}
-                        gutterBottom
-                        sx={{ textShadow: "1px 1px 4px rgba(0,0,0,0.8)" }}
-                      >
-                        {product.title}
-                      </Typography>
-                      <Typography
-                        variant="subtitle1"
-                        gutterBottom
-                        sx={{ textShadow: "1px 1px 3px rgba(0,0,0,0.7)" }}
-                      >
-                        {product.category}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          backgroundColor: "primary.main",
-                          px: 2,
-                          py: 0.5,
-                          borderRadius: 2,
-                          fontWeight: "bold",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
-                        }}
-                      >
-                        {product.price} JOD
-                      </Typography>
-                    </Box>
+                      LOGIN
+                    </Button>
+                    <Button
+                      onClick={handleGoogleLogin}
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        mt: 2,
+                        py: 1.5,
+                        color: "#4285F4",
+                        borderColor: "#4285F4",
+                        "&:hover": { backgroundColor: "#f5f5f5" },
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <img
+                        src="https://developers.google.com/identity/images/g-logo.png"
+                        alt="Google"
+                        style={{ width: 20, height: 20 }}
+                      />
+                      LOGIN WITH GOOGLE
+                    </Button>
                   </Box>
-                </NextLink>
-              ))}
-            </Slider>
-          </Box>
-        </Container>
-      </Box>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Grid>
 
-      <Box
-        component="section"
-        sx={{
-          py: 10,
-          backgroundImage:
-            "linear-gradient(rgba(240, 255, 240,0.9),rgba(76, 175, 80))",
-          color: "text.primary",
+          {/* Right side: Register or invitation to register */}
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{
+              p: 6,
+              backgroundColor: "#4caf50",
+              color: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              textAlign: "center",
+            }}
+          >
+            <AnimatePresence mode="wait">
+              {showRegister ? (
+                <motion.div
+                  key="register-form"
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Typography variant="h3" fontWeight="bold">
+                    Register
+                  </Typography>
+                  <Box
+                    component="form"
+                    onSubmit={handleRegisterSubmit}
+                    sx={{ width: "100%", maxWidth: 289 }}
+                  >
+                    <TextField
+                      label="First Name"
+                      name="first_name"
+                      fullWidth
+                      margin="normal"
+                      variant="filled"
+                      value={registerForm.first_name}
+                      onChange={handleRegisterChange}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
+                    />
+                    <TextField
+                      label="Last Name"
+                      name="last_name"
+                      fullWidth
+                      margin="normal"
+                      variant="filled"
+                      value={registerForm.last_name}
+                      onChange={handleRegisterChange}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
+                    />
+                    <TextField
+                      label="Email"
+                      name="email"
+                      fullWidth
+                      margin="normal"
+                      variant="filled"
+                      value={registerForm.email}
+                      onChange={handleRegisterChange}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
+                    />
+                    <TextField
+                      label="Password"
+                      name="password"
+                      type="password"
+                      fullWidth
+                      margin="normal"
+                      variant="filled"
+                      value={registerForm.password}
+                      onChange={handleRegisterChange}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
+                    />
+                    <TextField
+                      label="Phone Number"
+                      name="phone_number"
+                      fullWidth
+                      margin="normal"
+                      variant="filled"
+                      value={registerForm.phone_number}
+                      onChange={handleRegisterChange}
+                      sx={{ bgcolor: "#fff", borderRadius: 1 }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      fullWidth
+                      sx={{
+                        mt: 4,
+                        py: 1.5,
+                        backgroundColor: "#fff",
+                        color: "#4caf50",
+                      }}
+                    >
+                      SIGNUP
+                    </Button>
+                  </Box>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="register-welcome"
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Typography variant="h3" fontWeight="bold">
+                    New here?
+                  </Typography>
+                  <Typography variant="h6" sx={{ mt: 2 }}>
+                    Don't have an account?
+                  </Typography>
+                  <Button
+                    onClick={() => setShowRegister(true)}
+                    variant="contained"
+                    sx={{
+                      mt: 4,
+                      backgroundColor: "#fff",
+                      color: "#4caf50",
+                      fontWeight: "bold",
+                      px: 4,
+                      py: 1,
+                    }}
+                  >
+                    SIGNUP
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Grid>
+        </Grid>
+      </Paper>
+
+      {/* Success/Error modal dialog */}
+      <Dialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        PaperProps={{
+          sx: { borderRadius: 3, p: 3, minWidth: 300, textAlign: "center" },
         }}
       >
-        <Container maxWidth="md" sx={{ textAlign: "center" }}>
-          <Typography variant="h5" fontWeight={700} sx={{ mb: 6 }}>
-            Why Choose Us
+        {modalTitle.toLowerCase().includes("success") ? (
+          <CheckCircleIcon sx={{ fontSize: 60, color: "green", mb: 2 }} />
+        ) : (
+          <ErrorIcon sx={{ fontSize: 60, color: "red", mb: 2 }} />
+        )}
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+            color: modalTitle.toLowerCase().includes("success")
+              ? "green"
+              : "red",
+          }}
+        >
+          {modalTitle}
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontSize: "1rem", color: "#555" }}>
+            {modalMessage}
           </Typography>
-          <WhyChoose />
-        </Container>
-      </Box>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center" }}>
+          <Button
+            onClick={() => {
+              setModalOpen(false);
+              router.push("/home");
+            }}
+            variant="contained"
+            sx={{
+              mt: 2,
+              px: 4,
+              py: 1,
+              backgroundColor: modalTitle.toLowerCase().includes("success")
+                ? "green"
+                : "red",
+              color: "#fff",
+            }}
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-      {/* ✅ Footer Section */}
-      <Footer />
-    </main>
+      {/* Account suspension modal dialog */}
+      <Dialog open={showSuspensionModal} disableEscapeKeyDown>
+        <DialogTitle sx={{ textAlign: "center", color: "error.main" }}>
+          Account Suspended
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", minWidth: 300 }}>
+          <Typography>Your account has been suspended by the admin.</Typography>
+          <Typography sx={{ mt: 1, fontWeight: "bold" }}>
+            Contact us at:
+          </Typography>
+          <Box sx={{ mt: 1 }}>
+            <Typography>
+              📧{" "}
+              <Link href="mailto:AvocadoAdmin@gmail.com" underline="hover">
+                AvocadoAdmin@gmail.com
+              </Link>
+            </Typography>
+            <Typography>📞 06 595 782</Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center" }}>
+          <Button variant="contained" onClick={() => window.location.reload()}>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }
