@@ -1,4 +1,3 @@
-// src/app/auth/layout.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -13,6 +12,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Link
 } from "@mui/material";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,11 +21,15 @@ import ErrorIcon from "@mui/icons-material/Error";
 import { useSearchParams, useRouter } from "next/navigation";
 
 export default function AuthSplitLayout() {
+  // State to toggle between Login and Register screens
   const [showRegister, setShowRegister] = useState(false);
+
+  // States for modal popup messages (success/error)
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
 
+  // Data for login and register forms
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
     first_name: "",
@@ -35,16 +39,26 @@ export default function AuthSplitLayout() {
     phone_number: "",
   });
 
+  // Account suspension state
+  const [suspended, setSuspended] = useState(false);
+  const [showSuspensionModal, setShowSuspensionModal] = useState(false);
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-  // Handle Google OAuth callback
+  // Function to show the popup modal
+  const showModal = (title: string, message: string) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalOpen(true);
+  };
+
+  // Handle OAuth return from Google
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) {
       localStorage.setItem("token", token);
-      // Fetch user profile after OAuth
       axios
         .get(`${API}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -52,7 +66,6 @@ export default function AuthSplitLayout() {
         .then((res) => {
           localStorage.setItem("user", JSON.stringify(res.data.user));
           showModal("Success", "Logged in with Google successfully!");
-          // Redirect to homepage first
           router.push("/");
         })
         .catch(() => {
@@ -61,38 +74,45 @@ export default function AuthSplitLayout() {
     }
   }, [searchParams, API, router]);
 
-  const showModal = (title: string, message: string) => {
-    setModalTitle(title);
-    setModalMessage(message);
-    setModalOpen(true);
-  };
-
+  // Update login form data on input change
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setLoginForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Update register form data on input change
   const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setRegisterForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Traditional login
+  // Submit login data
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const { data } = await axios.post(`${API}/api/auth/login`, loginForm);
-      // store token and user
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       showModal("Success", "Login successful!");
-      // redirect to homepage first
       router.push("/");
     } catch (err: any) {
+      // If account is suspended, show suspension modal instead of error dialog
+      if (
+        err.response?.status === 403 &&
+        (
+          err.response.data.message?.toLowerCase().includes("suspend") ||
+          err.response.data.error?.toLowerCase().includes("suspend")
+        )
+      ) {
+        setSuspended(true);
+        setShowSuspensionModal(true);
+        return;
+      }
       showModal("Error", err.response?.data?.error || "Login failed");
     }
   };
 
+  // Submit registration data
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -104,6 +124,7 @@ export default function AuthSplitLayout() {
     }
   };
 
+  // Redirect to Google OAuth login
   const handleGoogleLogin = () => {
     window.location.href = `${API}/api/auth/google`;
   };
@@ -132,7 +153,7 @@ export default function AuthSplitLayout() {
         }}
       >
         <Grid container>
-          {/* Left side: Login or transition */}
+          {/* Left side: Login or welcome back message */}
           <Grid
             item
             xs={12}
@@ -259,7 +280,7 @@ export default function AuthSplitLayout() {
             </AnimatePresence>
           </Grid>
 
-          {/* Right side: Signup prompt or form */}
+          {/* Right side: Register or invitation to register */}
           <Grid
             item
             xs={12}
@@ -393,6 +414,7 @@ export default function AuthSplitLayout() {
         </Grid>
       </Paper>
 
+      {/* Success/Error modal dialog */}
       <Dialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -437,6 +459,32 @@ export default function AuthSplitLayout() {
               color: "#fff",
             }}
           >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Account suspension modal dialog */}
+      <Dialog open={showSuspensionModal} disableEscapeKeyDown>
+        <DialogTitle sx={{ textAlign: "center", color: "error.main" }}>
+          Account Suspended
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", minWidth: 300 }}>
+          <Typography>Your account has been suspended by the admin.</Typography>
+          <Typography sx={{ mt: 1, fontWeight: "bold" }}>Contact us at:</Typography>
+          <Box sx={{ mt: 1 }}>
+            <Typography>
+              📧{" "}
+              <Link href="mailto:AvocadoAdmin@gmail.com" underline="hover">
+                AvocadoAdmin@gmail.com
+              </Link>
+              
+            </Typography>
+            <Typography>📞 06 595 782</Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center" }}>
+          <Button variant="contained" onClick={() => window.location.reload()}>
             OK
           </Button>
         </DialogActions>
