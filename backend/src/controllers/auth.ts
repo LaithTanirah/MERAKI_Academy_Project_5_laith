@@ -1,11 +1,10 @@
-// src/controllers/auth.ts
 import { Request, Response, NextFunction } from "express";
 import pool from "../models/connectDB";
 import bcrypt from "bcryptjs";
 import JWT from "jsonwebtoken";
 import dotenv from "dotenv";
 import passport from "passport";
- 
+
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -65,12 +64,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     // Use provided role_id or fallback to default (2 = regular user)
     const assignedRoleId = role_id || 2;
 
-    // Insert new user with role_id
+    // Insert new user with role_id, is_suspended defaults to FALSE
     const { rows: userRows } = await pool.query(
       `
       INSERT INTO users (first_name, last_name, email, password, phone_number, role_id)
       VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id, first_name, last_name, email, role_id
+      RETURNING id, first_name, last_name, email, role_id, is_suspended
       `,
       [first_name, last_name, email, hashedPassword, phone_number || null, assignedRoleId]
     );
@@ -109,10 +108,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Get user by email with role_id
+    // Get user by email with role_id and suspension status
     const { rows: userRows } = await pool.query(
-      `SELECT id, first_name, last_name, email, password, role_id
-       FROM users WHERE email = $1`,
+      `SELECT id, first_name, last_name, email, password, role_id, is_suspended
+         FROM users WHERE email = $1`,
       [email]
     );
     if (!userRows.length) {
@@ -127,6 +126,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // If user is suspended, block access
+    if (user.is_suspended) {
+      return res.status(403).json({ error: "Account suspended. Please contact admin." });
+    }
+
     // Generate token
     const token = JWT.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1h" });
 
@@ -138,6 +142,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         last_name: user.last_name,
         email: user.email,
         role_id: user.role_id,
+        is_suspended: user.is_suspended
       },
       token,
     });
@@ -148,12 +153,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 // -----------------------
-// User Management
+// Get All Users (for Admin)
 // -----------------------
 export const getAllUsers = async (_req: Request, res: Response): Promise<void> => {
   try {
     const { rows } = await pool.query(
-      `SELECT id, first_name, last_name, email, role_id
+      `SELECT id, first_name, last_name, email, role_id, is_suspended
          FROM users
         WHERE is_deleted = FALSE`
     );
@@ -164,6 +169,9 @@ export const getAllUsers = async (_req: Request, res: Response): Promise<void> =
   }
 };
 
+// -----------------------
+// Update User Role
+// -----------------------
 export const updateUserRole = async (req: Request, res: Response): Promise<void> => {
   const userId = Number(req.params.id);
   const { role_id } = req.body;
@@ -172,7 +180,7 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
       `UPDATE users
           SET role_id = $1
         WHERE id = $2
-        RETURNING id, first_name, last_name, email, role_id`,
+        RETURNING id, first_name, last_name, email, role_id, is_suspended`,
       [role_id, userId]
     );
     if (!rows.length) {
@@ -186,7 +194,7 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
 };
 
 // -----------------------
-// Soft-delete للمستخدم
+// Soft-delete User
 // -----------------------
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   const userId = Number(req.params.id);
@@ -208,5 +216,66 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
   } catch (err) {
     console.error("Error soft-deleting user:", err);
     res.status(500).json({ message: "Error soft-deleting user" });
+  }
+};
+
+// -----------------------
+// Suspend User (Admin action)
+// -----------------------
+export const suspendUser = async (req: Request, res: Response): Promise<void> => {
+  const userId = Number(req.params.id);
+  try {
+    const { rowCount } = await pool.query(
+      `UPDATE users
+         SET is_suspended = TRUE
+       WHERE id = $1`,
+      [userId]
+    );
+    if (!rowCount) return res.status(404).json({ message: "User not found" });
+    res.json({ message: "User suspended" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error suspending user" });
+  }
+};
+
+// -----------------------
+// Unsuspend User (Admin action)
+// -----------------------
+export const unsuspendUser = async (req: Request, res: Response): Promise<void> => {
+  const userId = Number(req.params.id);
+  try {
+    const { rowCount } = await pool.query(
+      `UPDATE users
+         SET is_suspended = FALSE
+       WHERE id = $1`,
+      [userId]
+    );
+    if (!rowCount) return res.status(404).json({ message: "User not found" });
+    res.json({ message: "User reinstated" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error reinstating user" });
+  }
+};
+
+// -----------------------
+// Get Current User Profile
+// -----------------------
+export const getProfile = async (req: Request, res: Response): Promise<void> => {
+  // Assuming JWT payload is decoded in a middleware and attached to req.user
+  const userId = (req as any).user.userId;
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, first_name, last_name, email, role_id, is_suspended
+         FROM users
+        WHERE id = $1`,
+      [userId]
+    );
+    if (!rows.length) return res.status(404).json({ message: "Not found" });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching profile" });
   }
 };
