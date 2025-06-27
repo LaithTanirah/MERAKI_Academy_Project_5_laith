@@ -7,7 +7,6 @@ import Grid from "@mui/material/Grid";
 import axios from "axios";
 import { category } from "../types/cat";
 
-// Shop All product info
 const shopAll = {
   title: "Shop All Products",
   img: "/logos/shopall.png",
@@ -25,7 +24,6 @@ export default function Categories() {
 
   return (
     <Container maxWidth="lg">
-      {/* Main Categories */}
       <Grid container spacing={5} justifyContent="center">
         {cats.map((c) => (
           <Grid
@@ -51,7 +49,7 @@ export default function Categories() {
                 }}
               >
                 <Avatar
-                  src={c.images}
+                  src={c.image}
                   alt={c.title}
                   sx={{
                     width: 120,
@@ -75,7 +73,6 @@ export default function Categories() {
         ))}
       </Grid>
 
-      {/* Shop All Section */}
       <Box mt={10} textAlign="center">
         <Link href={shopAll.href} style={{ textDecoration: "none" }}>
           <Box
@@ -119,4 +116,3 @@ export default function Categories() {
     </Container>
   );
 }
-

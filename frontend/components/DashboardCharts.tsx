@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Box, Card, Typography } from "@mui/joy";
 import {
   PieChart,
@@ -13,24 +14,32 @@ import {
   Tooltip,
 } from "recharts";
 
-const pieData = [
-  { name: "Pending", value: 7 },
-  { name: "Delivered", value: 15 },
-  { name: "Canceled", value: 3 },
-];
-const pieColors = ["#f57c00", "#2e7d32", "#d32f2f"];
-
-const lineData = [
-  { day: "Mon", sales: 120 },
-  { day: "Tue", sales: 200 },
-  { day: "Wed", sales: 150 },
-  { day: "Thu", sales: 250 },
-  { day: "Fri", sales: 300 },
-  { day: "Sat", sales: 180 },
-  { day: "Sun", sales: 220 },
-];
+const pieColors = ["#f57c00", "#2e7d32", "#d32f2f", "#1976d2"];
 
 export default function DashboardCharts() {
+  const [pieData, setPieData] = useState([]);
+  const [lineData, setLineData] = useState([]);
+
+  useEffect(() => {
+    // PieChart data
+    fetch("http://localhost:5000/api/dashboard/orders-status")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setPieData(data);
+        else setPieData([]);
+      })
+      .catch(() => setPieData([]));
+
+    // LineChart data
+    fetch("http://localhost:5000/api/dashboard/weekly-sales")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setLineData(data);
+        else setLineData([]);
+      })
+      .catch(() => setLineData([]));
+  }, []);
+
   return (
     <Box
       mt={6}
@@ -40,30 +49,29 @@ export default function DashboardCharts() {
       width="100%"
       maxWidth="1000px"
     >
-      {/* Pie Chart */}
       <Card variant="outlined" sx={{ p: 3 }}>
         <Typography level="title-lg" mb={2}>
           🧾 Orders per Status
         </Typography>
         <ResponsiveContainer width="100%" height={250}>
           <PieChart>
-            <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={80}>
-              {pieData.map((entry, index) => (
-                <Cell key={index} fill={pieColors[index % pieColors.length]} />
-              ))}
+            <Pie data={Array.isArray(pieData) ? pieData : []} dataKey="value" nameKey="name" outerRadius={80}>
+              {Array.isArray(pieData) &&
+                pieData.map((_, index) => (
+                  <Cell key={index} fill={pieColors[index % pieColors.length]} />
+                ))}
             </Pie>
             <Tooltip />
           </PieChart>
         </ResponsiveContainer>
       </Card>
 
-      {/* Line Chart */}
       <Card variant="outlined" sx={{ p: 3 }}>
         <Typography level="title-lg" mb={2}>
           📈 Sales Over Week
         </Typography>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={lineData}>
+          <LineChart data={Array.isArray(lineData) ? lineData : []}>
             <XAxis dataKey="day" />
             <YAxis />
             <Tooltip />

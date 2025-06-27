@@ -1,16 +1,19 @@
 "use client";
 
 import "./globals.css";
-import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
-import { CssVarsProvider } from '@mui/joy/styles';
+import { ThemeProvider, CssBaseline, createTheme, Box } from "@mui/material";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import ChatWidget from "../components/ChatWidget";
+import DeliverySidebar from "../components/DeliverySidebar"; // تأكد إنه موجود
+
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import 'mdb-react-ui-kit/dist/css/mdb.min.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+import "mdb-react-ui-kit/dist/css/mdb.min.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
+// MUI Theme setup
 const theme = createTheme({
   palette: {
     primary: { main: "#689F38" },
@@ -27,16 +30,54 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const hideNavbar = pathname === "/";
+  const [roleId, setRoleId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      setRoleId(user?.role_id ?? null);
+    }
+  }, [pathname]);
+
+  const isHome = pathname === "/";
+  const isDelivery = roleId === 4;
+  const hideNavbar = isHome || isDelivery;
 
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" style={{ height: "100%" }}>
+      <body
+        style={{
+          minHeight: "100vh",
+          margin: 0,
+          padding: 0,
+          background: isHome
+            ? "linear-gradient(to bottom, #b9fbc0, #a3c4bc)"
+            : "#F5F5F5",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <ThemeProvider theme={theme}>
           <CssBaseline />
+
+          {/* Hide Navbar for delivery or homepage */}
           {!hideNavbar && <Navbar />}
-          <ChatWidget /> 
-          {children}
+
+          {/* Show DeliverySidebar if delivery */}
+          {isDelivery ? (
+            <Box sx={{ display: "flex" }}>
+              <DeliverySidebar />
+              <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
+                {children}
+              </Box>
+            </Box>
+          ) : (
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              {children}
+            </div>
+          )}
+
+          <ChatWidget />
         </ThemeProvider>
       </body>
     </html>
