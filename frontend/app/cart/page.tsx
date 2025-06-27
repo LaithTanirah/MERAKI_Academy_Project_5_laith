@@ -240,12 +240,14 @@ const ShoppingCart: React.FC = () => {
     lat: number;
     lng: number;
   }) => {
+    console.log(userId);
+    
     if (!token || !userId) return;
     try {
       const res = await axios.post(
         "/location",
         {
-          user_id: userId,
+          userId: userId,
           location_name: location.name,
           latitude: location.lat,
           longitude: location.lng,
