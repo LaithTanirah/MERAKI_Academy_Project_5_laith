@@ -1,6 +1,7 @@
+// ShoppingCart.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -24,8 +25,12 @@ import {
   Box,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import dynamic from "next/dynamic";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
+const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
+  ssr: false,
+});
 
 axios.defaults.baseURL = "http://localhost:5000/api";
 
@@ -46,6 +51,13 @@ interface CartItem {
   quantity: number;
 }
 
+interface LocationData {
+  location_id: number;
+  location_name: string;
+  latitude: number;
+  longitude: number;
+}
+
 const ShoppingCart: React.FC = () => {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
@@ -53,11 +65,13 @@ const ShoppingCart: React.FC = () => {
   const [cartId, setCartId] = useState<number | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [cartProductList, setCartProductList] = useState<CartProduct[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<number | null>(
     null
   );
+  const [userLocation, setUserLocation] = useState<LocationData | null>(null);
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<
@@ -70,15 +84,15 @@ const ShoppingCart: React.FC = () => {
     cvv: "",
   });
 
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
-  const [modalMessage, setModalMessage] = useState("")
-  
+  const [modalMessage, setModalMessage] = useState("");
+  const modalOnCloseRef = useRef<(() => void) | null>(null);
 
   const showModal = (title: string, message: string, onClose?: () => void) => {
     setModalTitle(title);
     setModalMessage(message);
+    modalOnCloseRef.current = onClose || null;
     setModalOpen(true);
   };
 
@@ -98,53 +112,42 @@ const ShoppingCart: React.FC = () => {
   }, [token]);
 
   useEffect(() => {
-    if (userId === null || !token) return;
-
-    const fetchCart = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get<{ cart?: { id: number }[] }>(
-          `/cart/getAllCartByIsDeletedFalse/${userId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        const carts = res.data.cart ?? [];
-        setCartId(carts[0]?.id ?? null);
-      } catch {
-        setError("Failed to fetch cart.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCart();
+    if (!userId || !token) return;
+    axios.get(`/location?userId=${userId}`).then((res) => {
+      const locations = res.data.result;
+      if (locations.length > 0) setUserLocation(locations[0]);
+    });
   }, [userId, token]);
 
   useEffect(() => {
-    if (cartId === null || !token) return;
-
+    if (!userId || !token) return;
     setLoading(true);
     axios
-      .get<{
-        result: Array<{
-          cartid: number;
-          productid: number;
-          product_title: string;
-          price: number;
-          images: string[];
-          size: string;
-          quantity: number;
-        }>;
-      }>(`/cartProduct/cart/${cartId}`, {
+      .get(`/cart/getAllCartByIsDeletedFalse/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const carts = res.data.cart ?? [];
+        setCartId(carts[0]?.id ?? null);
+      })
+      .catch(() => setError("Failed to fetch cart."))
+      .finally(() => setLoading(false));
+  }, [userId, token]);
+
+  useEffect(() => {
+    if (!cartId || !token) return;
+    setLoading(true);
+    axios
+      .get(`/cartProduct/cart/${cartId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         const items = res.data.result;
         setCartItems(
-          items.map(({ productid, quantity }) => ({ productid, quantity }))
+          items.map(({ productid, quantity }: any) => ({ productid, quantity }))
         );
         setCartProductList(
-          items.map((item) => ({
+          items.map((item: any) => ({
             id: item.productid,
             title: item.product_title,
             price: item.price,
@@ -154,9 +157,7 @@ const ShoppingCart: React.FC = () => {
         );
         setError(null);
       })
-      .catch(() => {
-        setError("Failed to load cart items.");
-      })
+      .catch(() => setError("Failed to load cart items."))
       .finally(() => setLoading(false));
   }, [cartId, token]);
 
@@ -194,24 +195,13 @@ const ShoppingCart: React.FC = () => {
     return prod ? sum + prod.price * item.quantity : sum;
   }, 0);
 
-  const handleCheckoutClick = () => {
-    setIsPaymentModalOpen(true);
-  };
-
-  const handlePaymentSelection = (method: "Cash" | "Visa") => {
-    setSelectedPayment(method);
-  };
-
   const finalizeOrder = () => {
     if (!token || !userId) return;
-
     axios
       .put(
         `/cart/checkout/${cartId}`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       )
       .then((res) => {
         if (res.data.success) {
@@ -219,26 +209,21 @@ const ShoppingCart: React.FC = () => {
             .post(
               `/cart/createNewCart`,
               { user_id: userId },
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
+              { headers: { Authorization: `Bearer ${token}` } }
             )
             .then((create) => {
               setCartId(create.data.result.id);
-              showModal("Success", "Order placed successfully!");
+              showModal("Success", "Order placed successfully!", () =>
+                router.push("/orders")
+              );
               setIsPaymentModalOpen(false);
-              router.push("/orders");
             })
-            .catch(() => {
-              showModal("Error", "Failed to create new cart.");
-            });
+            .catch(() => showModal("Error", "Failed to create new cart."));
         } else {
           showModal("Error", "Checkout failed.");
         }
       })
-      .catch(() => {
-        showModal("Error", "Checkout request failed.");
-      });
+      .catch(() => showModal("Error", "Checkout request failed."));
   };
 
   const handleVisaPaymentSubmit = () => {
@@ -249,6 +234,33 @@ const ShoppingCart: React.FC = () => {
     }
     showModal("Success", "Visa payment successful!");
     finalizeOrder();
+  };
+  const handleLocationSave = async (location: {
+    name: string;
+    lat: number;
+    lng: number;
+  }) => {
+    if (!token || !userId) return;
+    try {
+      const res = await axios.post(
+        "/location",
+        {
+          user_id: userId,
+          location_name: location.name,
+          latitude: location.lat,
+          longitude: location.lng,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setUserLocation(res.data.result);
+      showModal("Success", "Location saved successfully.");
+    } catch {
+      showModal("Error", "Failed to save location.");
+    } finally {
+      setLocationDialogOpen(false);
+    }
   };
 
   return (
@@ -336,20 +348,58 @@ const ShoppingCart: React.FC = () => {
               Total Items:{" "}
               <strong>{cartItems.reduce((a, i) => a + i.quantity, 0)}</strong>
             </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Location:{" "}
+              {userLocation ? (
+                <strong>{userLocation.location_name}</strong>
+              ) : (
+                <em style={{ color: "red" }}>Not Set</em>
+              )}
+            </Typography>
             <Typography variant="h5" fontWeight="bold" mt={2} mb={3}>
               Total: ${totalPrice.toFixed(2)}
             </Typography>
+            {!userLocation && (
+              <Button
+                variant="outlined"
+                fullWidth
+                sx={{ mb: 1 }}
+                onClick={() => setLocationDialogOpen(true)}
+              >
+                Add Location
+              </Button>
+            )}
             <Button
               variant="contained"
               fullWidth
-              onClick={handleCheckoutClick}
-              disabled={cartProductList.length === 0}
+              onClick={() => setIsPaymentModalOpen(true)}
+              disabled={cartProductList.length === 0 || !userLocation}
             >
               Checkout
             </Button>
           </Paper>
         </Grid>
       </Grid>
+
+      {/*-------------------------------------------------*/}
+      {locationDialogOpen && (
+        <Dialog
+          open
+          onClose={() => setLocationDialogOpen(false)}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle>Select Your Location</DialogTitle>
+          <DialogContent>
+            <LocationPicker onSave={handleLocationSave} />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setLocationDialogOpen(false)}>Cancel</Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {/*-------------------------------------------------*/}
 
       {/* Payment Dialog */}
       <Dialog
@@ -362,27 +412,25 @@ const ShoppingCart: React.FC = () => {
             <Stack spacing={2} mt={2}>
               <Button
                 variant="outlined"
-                onClick={() => handlePaymentSelection("Cash")}
+                onClick={() => setSelectedPayment("Cash")}
               >
                 Pay with Cash
               </Button>
               <Button
                 variant="contained"
-                onClick={() => handlePaymentSelection("Visa")}
+                onClick={() => setSelectedPayment("Visa")}
               >
                 Pay with Visa
               </Button>
             </Stack>
           )}
-
           {selectedPayment === "Cash" && (
             <Box mt={2}>
               <Typography>
-                You selected <strong>Cash</strong>. Please pay on delivery.
+                You selected <strong>Cash</strong>. Pay on delivery.
               </Typography>
             </Box>
           )}
-
           {selectedPayment === "Visa" && (
             <Stack spacing={2} mt={2}>
               <TextField
@@ -435,7 +483,7 @@ const ShoppingCart: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal Dialog */}
+      {/* Feedback Modal */}
       <Dialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -470,7 +518,7 @@ const ShoppingCart: React.FC = () => {
               setModalOpen(false);
               if (modalOnCloseRef.current) {
                 modalOnCloseRef.current();
-                modalOnCloseRef.current = null; // clear after running
+                modalOnCloseRef.current = null;
               }
             }}
             variant="contained"

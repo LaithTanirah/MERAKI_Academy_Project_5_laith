@@ -15,7 +15,12 @@ import cartRouter from "./src/routes/cart";
 import permissionRoutes from "./src/routes/permission";
 import rolePermissionRoutes from "./src/routes/rolePermission";
 import favoriteRouter from "./src/routes/favorite";
+
+import locationsRouter from "./src/routes/location";
+
+
 import dashboardRoutes from "./src/routes/dashboard";
+
 // --- SOCKET.IO SETUP ---
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -102,7 +107,12 @@ app.use("/api/cartProduct", cartProductRouter);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/rolePermissions", rolePermissionRoutes);
 app.use("/api/favorite", favoriteRouter);
+
+app.use("/api/location", locationsRouter);
+
+
 app.use("/api/dashboard", dashboardRoutes);
+
 // --- DEFAULT ROUTE ---
 app.get("/", (req, res) => {
   res.send("API is running...");
@@ -111,4 +121,4 @@ app.get("/", (req, res) => {
 // --- START SERVER ---
 server.listen(PORT, () => {
   console.log(`🚀 Server + Socket.IO running at http://localhost:${PORT}`);
-}); 
+});
