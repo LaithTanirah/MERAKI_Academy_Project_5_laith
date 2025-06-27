@@ -7,7 +7,7 @@ export default function ShopHero() {
   return (
     <Box
       sx={{
-        background: "linear-gradient(to bottom right, #f5fdf5, #e8f5e9)",
+       backgroundImage: "linear-gradient(#4caf50,rgb(255, 253, 253))",
         py: { xs: 10, md: 14 },
       }}
     >
@@ -61,45 +61,32 @@ export default function ShopHero() {
           style={{ maxWidth: 500 }}
         >
           <Typography
-            variant="h3"
-            fontWeight={800}
-            color="primary"
+            variant="h1"
+            fontWeight={1000}
+            color="white"
             gutterBottom
             sx={{
               textAlign: { xs: "center", md: "left" },
               fontSize: { xs: "2rem", md: "2.5rem" },
             }}
           >
-            Your Organic Journey Starts Here 🌱
+            Welcome to Avocado
           </Typography>
 
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={{ mb: 3, textAlign: { xs: "center", md: "left" }, lineHeight: 1.7 }}
+            sx={{
+              mb: 3,
+              textAlign: { xs: "center", md: "left" },
+              lineHeight: 1.7,
+            }}
           >
-            Shop fresh organic products at amazing prices and get them delivered to your doorstep in no time.
-            A convenient and reliable experience every day.
+             Fresh, Healthy & Organic Products Delivered to Your Doorstep
           </Typography>
 
           <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              sx={{
-                px: 4,
-                py: 1.5,
-                borderRadius: "10px",
-                boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
-                transition: "all 0.3s",
-                "&:hover": {
-                  backgroundColor: "#558b2f",
-                },
-              }}
-            >
-              Shop Now
-            </Button>
+           
             <Button
               variant="text"
               sx={{
