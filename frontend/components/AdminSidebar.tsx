@@ -1,4 +1,3 @@
-// components/AdminSidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -16,6 +15,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import CategoryIcon from "@mui/icons-material/Category";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 
@@ -46,18 +46,21 @@ export default function AdminSidebar({ open, onClose }: { open: boolean; onClose
             </ListItemIcon>
             <ListItemText primary="Home" />
           </ListItem>
+
           <ListItem component={Link} href="/admin" button>
             <ListItemIcon sx={{ color: "#2e7d32" }}>
               <DashboardIcon />
             </ListItemIcon>
             <ListItemText primary="Dashboard" />
           </ListItem>
+
           <ListItem component={Link} href="/admin/product" button>
             <ListItemIcon sx={{ color: "#2e7d32" }}>
               <InventoryIcon />
             </ListItemIcon>
             <ListItemText primary="Products" />
           </ListItem>
+
           <ListItem component={Link} href="/admin/category" button>
             <ListItemIcon sx={{ color: "#2e7d32" }}>
               <CategoryIcon />
@@ -65,7 +68,13 @@ export default function AdminSidebar({ open, onClose }: { open: boolean; onClose
             <ListItemText primary="Categories" />
           </ListItem>
 
-          {/* new Users link */}
+          <ListItem component={Link} href="/admin/delivery" button>
+            <ListItemIcon sx={{ color: "#2e7d32" }}>
+              <LocalShippingIcon />
+            </ListItemIcon>
+            <ListItemText primary="Delivery" />
+          </ListItem>
+
           <ListItem component={Link} href="/admin/users" button>
             <ListItemIcon sx={{ color: "#2e7d32" }}>
               <PersonIcon />

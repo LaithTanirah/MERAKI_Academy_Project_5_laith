@@ -21,15 +21,15 @@ import ErrorIcon from "@mui/icons-material/Error";
 import { useSearchParams, useRouter } from "next/navigation";
 
 export default function AuthSplitLayout() {
-  // State to toggle between Login and Register screens
+  // toggle between Login and Register screens
   const [showRegister, setShowRegister] = useState(false);
 
-  // States for modal popup messages (success/error)
+  // modal state for success/error messages
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
 
-  // Data for login and register forms
+  // form state
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
     first_name: "",
@@ -39,7 +39,7 @@ export default function AuthSplitLayout() {
     phone_number: "",
   });
 
-  // Account suspension state
+  // suspension modals
   const [suspended, setSuspended] = useState(false);
   const [showSuspensionModal, setShowSuspensionModal] = useState(false);
 
@@ -47,14 +47,14 @@ export default function AuthSplitLayout() {
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-  // Function to show the popup modal
+  // helper to open modal
   const showModal = (title: string, message: string) => {
     setModalTitle(title);
     setModalMessage(message);
     setModalOpen(true);
   };
 
-  // Handle OAuth return from Google
+  // handle Google OAuth return
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) {
@@ -74,42 +74,57 @@ export default function AuthSplitLayout() {
     }
   }, [searchParams, API, router]);
 
-  // Update login form data on input change
+  // update login form
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setLoginForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Update register form data on input change
+  // update register form
   const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setRegisterForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit login data
+  // submit login and redirect based on role
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const { data } = await axios.post(`${API}/api/auth/login`, loginForm);
+
+      // store token and user data
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      showModal("Success", "Login successful!");
+
+      const roleId = data.user?.role_id;
+
+      if (roleId === 1) {
+        // admin user
+        router.push("/admin");
+      } else if (roleId === 4) {
+        // delivery user
+        router.push("/delivery");
+      } else {
+        // regular user
+        showModal("Success", "Login successful!");
+      }
     } catch (err: any) {
-      // If account is suspended, show suspension modal instead of error dialog
       if (
         err.response?.status === 403 &&
         (err.response.data.message?.toLowerCase().includes("suspend") ||
           err.response.data.error?.toLowerCase().includes("suspend"))
       ) {
+        // account suspended
         setSuspended(true);
         setShowSuspensionModal(true);
         return;
       }
+      // generic error
       showModal("Error", err.response?.data?.error || "Login failed");
     }
   };
 
-  // Submit registration data
+  // submit registration
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -121,7 +136,7 @@ export default function AuthSplitLayout() {
     }
   };
 
-  // Redirect to Google OAuth login
+  // redirect to Google OAuth
   const handleGoogleLogin = () => {
     window.location.href = `${API}/api/auth/google`;
   };
@@ -150,7 +165,7 @@ export default function AuthSplitLayout() {
         }}
       >
         <Grid container>
-          {/* Left side: Login or welcome back message */}
+          {/* left side: login or welcome back */}
           <Grid
             item
             xs={12}
@@ -277,7 +292,7 @@ export default function AuthSplitLayout() {
             </AnimatePresence>
           </Grid>
 
-          {/* Right side: Register or invitation to register */}
+          {/* right side: register or invitation */}
           <Grid
             item
             xs={12}
@@ -363,7 +378,7 @@ export default function AuthSplitLayout() {
                     />
                     <Button
                       type="submit"
-                      variant="contained"
+                    variant="contained"
                       fullWidth
                       sx={{
                         mt: 4,
@@ -411,7 +426,7 @@ export default function AuthSplitLayout() {
         </Grid>
       </Paper>
 
-      {/* Success/Error modal dialog */}
+      {/* success/error modal */}
       <Dialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -462,7 +477,7 @@ export default function AuthSplitLayout() {
         </DialogActions>
       </Dialog>
 
-      {/* Account suspension modal dialog */}
+      {/* suspension modal */}
       <Dialog open={showSuspensionModal} disableEscapeKeyDown>
         <DialogTitle sx={{ textAlign: "center", color: "error.main" }}>
           Account Suspended
