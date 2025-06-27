@@ -10,9 +10,18 @@ import { Button, TextField, Stack } from "@mui/material";
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: typeof window !== "undefined" ? require("leaflet/dist/images/marker-icon-2x.png") : "",
-  iconUrl: typeof window !== "undefined" ? require("leaflet/dist/images/marker-icon.png") : "",
-  shadowUrl: typeof window !== "undefined" ? require("leaflet/dist/images/marker-shadow.png") : "",
+  iconRetinaUrl:
+    typeof window !== "undefined"
+      ? require("leaflet/dist/images/marker-icon-2x.png")
+      : "",
+  iconUrl:
+    typeof window !== "undefined"
+      ? require("leaflet/dist/images/marker-icon.png")
+      : "",
+  shadowUrl:
+    typeof window !== "undefined"
+      ? require("leaflet/dist/images/marker-shadow.png")
+      : "",
 });
 
 interface Props {
@@ -20,7 +29,9 @@ interface Props {
 }
 
 const LocationPicker: React.FC<Props> = ({ onSave }) => {
-  const [markerPos, setMarkerPos] = useState<[number, number]>([31.9539, 35.9106]); // Default to Amman
+  const [markerPos, setMarkerPos] = useState<[number, number]>([
+    31.9539, 35.9106,
+  ]); // Default to Amman
   const [locationName, setLocationName] = useState("");
 
   // Detect current location on mount
@@ -39,9 +50,15 @@ const LocationPicker: React.FC<Props> = ({ onSave }) => {
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
             );
             const data = await response.json();
-            console.log("Reverse Geocode Result:", data);
+            console.log(
+              "Reverse Geocode Result:",
+              data.address.country,
+              data.address.neighbourhood
+            ); 
             if (data.display_name) {
-              setLocationName(data.display_name);
+              setLocationName(
+                `${data.address.country} - ${data.address.neighbourhood}`
+              );
             }
           } catch (error) {
             console.error("Reverse geocoding failed:", error);
@@ -92,7 +109,14 @@ const LocationPicker: React.FC<Props> = ({ onSave }) => {
         value={locationName}
         onChange={(e) => setLocationName(e.target.value)}
       />
-      <div style={{ height: "400px", width: "100%", borderRadius: "8px", overflow: "hidden" }}>
+      <div
+        style={{
+          height: "400px",
+          width: "100%",
+          borderRadius: "8px",
+          overflow: "hidden",
+        }}
+      >
         <MapContainer
           id="leaflet-map"
           center={markerPos}

@@ -66,39 +66,7 @@ export default function HomePage() {
     <main style={{ backgroundColor: "#f1fef4", minHeight: "100vh" }}>
       <ShopHero />
 
-      <Box
-        component="section"
-        sx={{
-          backgroundImage: "linear-gradient(#4caf50, #e8f5e9)",
-          color: "#fff",
-          py: { xs: 6, md: 12 },
-          textAlign: "center",
-          px: 2,
-        }}
-      >
-        <Container maxWidth="md">
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <Typography
-              variant={isMobile ? "h4" : "h2"}
-              fontWeight="bold"
-              gutterBottom
-              sx={{ letterSpacing: 2 }}
-            >
-              Welcome to Avocado
-            </Typography>
-            <Typography
-              variant={isMobile ? "body1" : "h6"}
-              sx={{ mb: 4, opacity: 0.9 }}
-            >
-              Fresh, Healthy & Organic Products Delivered to Your Doorstep
-            </Typography>
-          </motion.div>
-        </Container>
-      </Box>
+ 
 
       <Box component="section" sx={{ py: 8, bgcolor: "#f4fff8" }}>
         <Container maxWidth="lg">
@@ -119,10 +87,10 @@ export default function HomePage() {
           py: 4,
           px: 0,
           mt: 0,
-          backgroundImage: "linear-gradient(#e8f5e9, #c8e6c9)",
+          backgroundColor:"-moz-initial",
         }}
       >
-        <Container maxWidth="lg" sx={{ px: { xs: 1, md: 0 } }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 1, md: 0,backgroundColor:"-moz-initial" } }}>
           <Box
             sx={{
               borderRadius: 3,
