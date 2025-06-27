@@ -40,6 +40,7 @@ export default function AdminDashboardPage() {
           alignItems: "center",
         }}
       >
+        {/* User avatar top right */}
         <Box sx={{ position: "absolute", top: 16, right: 16 }}>
           <IconButton>
             <Avatar variant="outlined">
@@ -48,6 +49,7 @@ export default function AdminDashboardPage() {
           </IconButton>
         </Box>
 
+        {/* Title */}
         <Typography
           level="h2"
           fontWeight="xl"
@@ -57,14 +59,17 @@ export default function AdminDashboardPage() {
           Admin Dashboard
         </Typography>
 
+        {/* KPI Cards Section */}
         <Box mb={4} width="100%" maxWidth="1000px">
           <KpiCards />
         </Box>
 
+        {/* Charts Section */}
         <Box mb={4} width="100%" maxWidth="1000px">
           <DashboardCharts />
         </Box>
 
+        {/* Recent Activity */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -105,6 +110,7 @@ export default function AdminDashboardPage() {
           </Card>
         </motion.div>
 
+        {/* Dashboard Action Cards */}
         <Box
           display="grid"
           gap={3}
@@ -113,6 +119,7 @@ export default function AdminDashboardPage() {
           gridTemplateColumns="repeat(auto-fit, minmax(280px, 1fr))"
           mt={6}
         >
+          {/* Products Card */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -127,42 +134,42 @@ export default function AdminDashboardPage() {
                 borderRadius: "2xl",
                 transition: "transform 0.3s",
                 "&:hover": { transform: "scale(1.02)" },
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
             >
-              <Box
-                display="flex"
-                justifyContent="center"
-                mb={2}
-                color="success.700"
-              >
+              <Box display="flex" justifyContent="center" mb={2} color="success.700">
                 <Inventory2Icon sx={{ fontSize: 40 }} />
               </Box>
-              <CardContent>
+              <CardContent sx={{ flexGrow: 1 }}>
                 <Typography level="title-lg" textAlign="center" mb={1}>
                   Products
                 </Typography>
                 <Typography level="body-sm" textAlign="center" mb={2}>
                   Manage your products efficiently
                 </Typography>
-                <Button
-                  component={Link}
-                  href="/admin/product"
-                  fullWidth
-                  sx={{
-                    backgroundColor: "#2e7d32",
-                    color: "#fff",
-                    "&:hover": {
-                      backgroundColor: "#256d28",
-                      transform: "scale(1.05)",
-                    },
-                  }}
-                >
-                  ➕ Manage Products
-                </Button>
               </CardContent>
+              <Button
+                component={Link}
+                href="/admin/product"
+                fullWidth
+                sx={{
+                  backgroundColor: "#2e7d32",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#256d28",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                ➕ Manage Products
+              </Button>
             </Card>
           </motion.div>
 
+          {/* Categories Card */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -177,42 +184,42 @@ export default function AdminDashboardPage() {
                 borderRadius: "2xl",
                 transition: "transform 0.3s",
                 "&:hover": { transform: "scale(1.02)" },
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
             >
-              <Box
-                display="flex"
-                justifyContent="center"
-                mb={2}
-                color="success.700"
-              >
+              <Box display="flex" justifyContent="center" mb={2} color="success.700">
                 <CategoryIcon sx={{ fontSize: 40 }} />
               </Box>
-              <CardContent>
+              <CardContent sx={{ flexGrow: 1 }}>
                 <Typography level="title-lg" textAlign="center" mb={1}>
                   Categories
                 </Typography>
                 <Typography level="body-sm" textAlign="center" mb={2}>
                   Organize product categories
                 </Typography>
-                <Button
-                  component={Link}
-                  href="/admin/category"
-                  fullWidth
-                  sx={{
-                    backgroundColor: "#2e7d32",
-                    color: "#fff",
-                    "&:hover": {
-                      backgroundColor: "#256d28",
-                      transform: "scale(1.05)",
-                    },
-                  }}
-                >
-                  🗂️ Manage Categories
-                </Button>
               </CardContent>
+              <Button
+                component={Link}
+                href="/admin/category"
+                fullWidth
+                sx={{
+                  backgroundColor: "#2e7d32",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#256d28",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                🗂️ Manage Categories
+              </Button>
             </Card>
           </motion.div>
 
+          {/* Delivery Card */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -222,28 +229,43 @@ export default function AdminDashboardPage() {
               variant="outlined"
               sx={{
                 p: 3,
-                opacity: 0.6,
+                background: "linear-gradient(to right, #e8f5e9, #f1f8e9)",
                 boxShadow: "lg",
                 borderRadius: "2xl",
-                backgroundColor: "#f1f3f4",
-                pointerEvents: "none",
+                transition: "transform 0.3s",
+                "&:hover": { transform: "scale(1.02)" },
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
             >
-              <Box display="flex" justifyContent="center" mb={2}>
+              <Box display="flex" justifyContent="center" mb={2} color="success.700">
                 <LocalShippingIcon sx={{ fontSize: 40 }} />
               </Box>
-              <CardContent>
+              <CardContent sx={{ flexGrow: 1 }}>
                 <Typography level="title-lg" textAlign="center" mb={1}>
                   Delivery
                 </Typography>
-                <Typography level="body-sm" textAlign="center" mb={1}>
-                  Configure delivery zones, fees, and methods here once
-                  available.
+                <Typography level="body-sm" textAlign="center" mb={2}>
+                  Manage delivery personnel and suspension statuses
                 </Typography>
-                <Button disabled fullWidth>
-                  🚚 Coming Soon
-                </Button>
               </CardContent>
+              <Button
+                component={Link}
+                href="/admin/delivery"
+                fullWidth
+                sx={{
+                  backgroundColor: "#2e7d32",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#256d28",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                🚚 Manage Delivery
+              </Button>
             </Card>
           </motion.div>
         </Box>
