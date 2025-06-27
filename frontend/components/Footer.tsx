@@ -87,7 +87,7 @@ export default function Footer() {
             <Box display="flex" gap={2}>
               {[
                 { name: "Mohammad", img: "/images/mohammad.jpg" },
-                { name: "Laith", img: "/images/laith.jpg" },
+                { name: "Laith", img: "/images/laith.jpeg" },
                 { name: "Hassan", img: "/founders/hassan.jpg" },
               ].map(({ name, img }, idx) => (
                 <Box
