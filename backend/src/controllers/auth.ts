@@ -264,7 +264,7 @@ export const unsuspendUser = async (req: Request, res: Response): Promise<void> 
 // -----------------------
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
   // Assuming JWT payload is decoded in a middleware and attached to req.user
-  const userId = (req as any).user.userId;
+  const userId = (req as any).token.userId;
   try {
     const { rows } = await pool.query(
       `SELECT id, first_name, last_name, email, role_id, is_suspended

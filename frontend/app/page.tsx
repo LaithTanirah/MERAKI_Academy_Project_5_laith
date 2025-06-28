@@ -60,11 +60,11 @@ export default function AuthSplitLayout() {
     if (token) {
       localStorage.setItem("token", token);
       axios
-        .get(`${API}/api/auth/me`, {
+        .get(`${API}/api/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
-          localStorage.setItem("user", JSON.stringify(res.data.user));
+          localStorage.setItem("user", JSON.stringify(res.data));
           showModal("Success", "Logged in with Google successfully!");
           router.push("/home");
         })
@@ -378,7 +378,7 @@ export default function AuthSplitLayout() {
                     />
                     <Button
                       type="submit"
-                    variant="contained"
+                      variant="contained"
                       fullWidth
                       sx={{
                         mt: 4,
@@ -459,7 +459,9 @@ export default function AuthSplitLayout() {
           <Button
             onClick={() => {
               setModalOpen(false);
-              router.push("/home");
+              if (modalTitle.toLowerCase().includes("success")) {
+                router.push("/home");
+              }
             }}
             variant="contained"
             sx={{

@@ -11,10 +11,9 @@ import DeliverySidebar from "../components/DeliverySidebar"; // تأكد إنه 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-import 'mdb-react-ui-kit/dist/css/mdb.min.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+import "mdb-react-ui-kit/dist/css/mdb.min.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "leaflet/dist/leaflet.css";
-
 
 // MUI Theme setup
 const theme = createTheme({
@@ -37,7 +36,16 @@ export default function RootLayout({
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userString = localStorage.getItem("user");
+      let user = null;
+
+      try {
+        user = userString ? JSON.parse(userString) : null;
+      } catch (err) {
+        console.error("Failed to parse user from localStorage:", err);
+        user = null;
+      }
+
       setRoleId(user?.role_id ?? null);
     }
   }, [pathname]);

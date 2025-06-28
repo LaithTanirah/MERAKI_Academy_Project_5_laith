@@ -126,7 +126,6 @@ const ProductDetailsPage: React.FC = () => {
     if (modalOpen && modalTitle.toLowerCase().includes("success")) {
       const timer = setTimeout(() => {
         setModalOpen(false);
-        router.push("/cart");
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -184,10 +183,37 @@ const ProductDetailsPage: React.FC = () => {
     }
   };
 
-  const handleAddToFavorites = () => {
-    setModalTitle("Success");
-    setModalMessage(`"${product?.title}" has been added to favorites! ❤️`);
-    setModalOpen(true);
+  const handleAddToFavorites = async () => {
+    if (!userId) {
+      setModalTitle("Error");
+      setModalMessage("You must be logged in to add favorites.");
+      setModalOpen(true);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/favorite",
+        {
+          productId: product?.id,
+          userId: userId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success) {
+        setModalTitle("Success");
+        setModalMessage(`"${product?.title}" has been added to favorites!`);
+      } else {
+        setModalTitle("Error");
+        setModalMessage("Failed to add product to favorites.");
+      }
+    } catch (error) {
+      setModalTitle("Error");
+      setModalMessage("Server error while adding to favorites.");
+    } finally {
+      setModalOpen(true);
+    }
   };
 
   return (
@@ -427,7 +453,6 @@ const ProductDetailsPage: React.FC = () => {
             onClick={() => {
               setModalOpen(false);
               if (modalTitle.toLowerCase().includes("success")) {
-                router.push("/cart");
               }
             }}
             variant="contained"

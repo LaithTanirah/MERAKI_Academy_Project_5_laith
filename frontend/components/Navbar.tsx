@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
@@ -231,8 +232,17 @@ export default function Navbar() {
             <List>
               {[
                 { text: "Home", icon: <HomeIcon />, link: "/home" },
-                { text: "Favorites", icon: <FavoriteBorderIcon />, link: "/FavoriteProducts" },
-                { text: "Contact Us", icon: <ContactMailIcon />, link: "/contact" },
+                {
+                  text: "Favorites",
+                  icon: <FavoriteBorderIcon />,
+                  link: "/FavoriteProducts",
+                },
+                { text: "Orders", icon: <ShoppingBagIcon />, link: "/orders" }, // <-- NEW ORDERS ITEM
+                {
+                  text: "Contact Us",
+                  icon: <ContactMailIcon />,
+                  link: "/contact",
+                },
               ].map(({ text, icon, link }) => (
                 <Link key={text} href={link} passHref legacyBehavior>
                   <ListItem
