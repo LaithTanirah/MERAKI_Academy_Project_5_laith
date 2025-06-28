@@ -2,12 +2,13 @@
 
 import { Box, Typography, Button, Container } from "@mui/material";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function ShopHero() {
   return (
     <Box
       sx={{
-       backgroundImage: "linear-gradient(#4caf50,rgb(255, 253, 253))",
+        background: "linear-gradient(180deg, #2e7d32 0%, #ffffff 100%)", // dark green gradient
         py: { xs: 10, md: 14 },
       }}
     >
@@ -22,9 +23,9 @@ export default function ShopHero() {
           px: { xs: 2, sm: 6 },
         }}
       >
-        {/* Circular Video with shadow */}
+        {/* Circular video with shadow */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
         >
@@ -34,8 +35,8 @@ export default function ShopHero() {
               height: { xs: 260, sm: 320, md: 400 },
               borderRadius: "50%",
               overflow: "hidden",
-              border: "6px solid #aed581",
-              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+              border: "8px solid #66bb6a",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.35)",
               mx: "auto",
               flexShrink: 0,
             }}
@@ -53,53 +54,61 @@ export default function ShopHero() {
           </Box>
         </motion.div>
 
-        {/* Text Section */}
+        {/* Welcome text section */}
         <motion.div
-          initial={{ opacity: 0, x: 80 }}
+          initial={{ opacity: 0, x: 60 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          style={{ maxWidth: 500 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          style={{ maxWidth: 520 }}
         >
           <Typography
-            variant="h1"
-            fontWeight={1000}
-            color="white"
+            variant="h2"
+            fontWeight={900}
+            color="#ffffff"
             gutterBottom
             sx={{
               textAlign: { xs: "center", md: "left" },
-              fontSize: { xs: "2rem", md: "2.5rem" },
+              fontSize: { xs: "2rem", md: "2.75rem" },
+              lineHeight: 1.2,
+              textShadow: "1px 1px 6px rgba(0,0,0,0.4)",
             }}
           >
-            Welcome to Avocado
+            Discover Fresh & Organic Avocado Products
           </Typography>
 
           <Typography
             variant="body1"
-            color="text.secondary"
+            color="#f1f8e9"
             sx={{
               mb: 3,
               textAlign: { xs: "center", md: "left" },
-              lineHeight: 1.7,
+              lineHeight: 1.8,
+              textShadow: "0 0 4px rgba(0,0,0,0.3)",
+              fontSize: { xs: "0.95rem", md: "1.1rem" },
             }}
           >
-             Fresh, Healthy & Organic Products Delivered to Your Doorstep
+            Get healthy, sustainably sourced products delivered straight to your
+            doorstep. Taste the difference today.
           </Typography>
 
           <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
-           
-            <Button
-              variant="text"
-              sx={{
-                mt: 2,
-                ml: 2,
-                color: "#4caf50",
-                fontWeight: 500,
-                textTransform: "none",
-                "&:hover": { textDecoration: "underline" },
-              }}
-            >
-              {/* Learn more about Avocado → */}
-            </Button>
+            <Link href="/products" passHref>
+              <Button
+                variant="contained"
+                color="success"
+                sx={{
+                  mt: 2,
+                  px: 4,
+                  py: 1.5,
+                  fontWeight: 700,
+                  textTransform: "capitalize",
+                  borderRadius: "30px",
+                  boxShadow: "0 4px 12px rgba(76,175,80,0.3)",
+                }}
+              >
+                Shop Now
+              </Button>
+            </Link>
           </Box>
         </motion.div>
       </Container>
