@@ -2,10 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Avatar, Container, Typography, Box } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import {
+  Avatar,
+  Container,
+  Typography,
+  Box,
+  Button,
+  Grid,
+} from "@mui/material";
 import axios from "axios";
 import { category } from "../types/cat";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 
 const shopAll = {
   title: "Shop All Products",
@@ -24,6 +31,25 @@ export default function Categories() {
 
   return (
     <Container maxWidth="lg">
+      <Typography
+        variant="h4"
+        fontWeight={700}
+        textAlign="center"
+        mb={1}
+        color="text.primary"
+        letterSpacing={1}
+      >
+        Categories You’ll Love
+      </Typography>
+      <Typography
+        variant="subtitle1"
+        textAlign="center"
+        color="text.secondary"
+        mb={4}
+      >
+        Discover our best-selling categories
+      </Typography>
+
       <Grid container spacing={5} justifyContent="center">
         {cats.map((c) => (
           <Grid
@@ -58,6 +84,7 @@ export default function Categories() {
                     border: "4px solid",
                     borderColor: "primary.main",
                     backgroundColor: "#fff",
+                    boxShadow: 3,
                   }}
                 />
                 <Typography
@@ -73,44 +100,32 @@ export default function Categories() {
         ))}
       </Grid>
 
-      <Box mt={10} textAlign="center">
+      <Box mt={8} textAlign="center">
         <Link href={shopAll.href} style={{ textDecoration: "none" }}>
-          <Box
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<ShoppingBagIcon />}
             sx={{
-              display: "inline-flex",
-              flexDirection: "column",
-              alignItems: "center",
-              px: "37%",
-              py: 3,
-              borderRadius: 8,
-              backgroundColor: "primary.light",
+              borderRadius: 4,
+              borderWidth: 2,
+              borderColor: "primary.main",
+              color: "primary.main",
+              fontWeight: 700,
+              px: 4,
+              py: 1.5,
+              fontSize: "1rem",
+              backgroundColor: "background.paper",
+              boxShadow: 2,
               transition: "all 0.3s ease",
               "&:hover": {
                 backgroundColor: "primary.main",
-                transform: "scale(1.05)",
+                color: "#fff",
               },
             }}
           >
-            <Avatar
-              src={shopAll.img}
-              alt={shopAll.title}
-              sx={{
-                width: 100,
-                height: 100,
-                mb: 1,
-                border: "3px solid white",
-                backgroundColor: "#fff",
-              }}
-            />
-            <Typography
-              variant="h6"
-              color="white"
-              fontWeight={600}
-              sx={{ mt: 1 }}
-            >
-              {shopAll.title}
-            </Typography>
-          </Box>
+            {shopAll.title}
+          </Button>
         </Link>
       </Box>
     </Container>

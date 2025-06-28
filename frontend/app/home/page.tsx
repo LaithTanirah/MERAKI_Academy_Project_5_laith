@@ -19,6 +19,7 @@ import Footer from "../../components/Footer";
 import axios from "axios";
 import { Product } from "../../types/product";
 import ShopHero from "@/components/ShopHero";
+import PromotionalBanner from "@/components/PromotionalBanner";
 
 interface TokenPayload {
   userId: string;
@@ -66,46 +67,32 @@ export default function HomePage() {
     <main style={{ backgroundColor: "#f1fef4", minHeight: "100vh" }}>
       <ShopHero />
 
- 
+      <PromotionalBanner />
 
       <Box component="section" sx={{ py: 8, bgcolor: "#f4fff8" }}>
         <Container maxWidth="lg">
-          <Typography
-            variant="h5"
-            fontWeight={600}
-            sx={{ mb: 4, textAlign: "center" }}
-          >
-            Categories You’ll Love
-          </Typography>
           <Categories />
         </Container>
       </Box>
 
-      <Box
-        component="section"
-        sx={{
-          py: 4,
-          px: 0,
-          mt: 0,
-          backgroundColor:"-moz-initial",
-        }}
-      >
-        <Container maxWidth="lg" sx={{ px: { xs: 1, md: 0,backgroundColor:"-moz-initial" } }}>
+      {/* Slider Section */}
+      <Box sx={{ py: 4, px: 0, mt: 0, backgroundColor: "transparent" }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 1, md: 0 } }}>
           <Box
             sx={{
-              borderRadius: 3,
+              borderRadius: 4,
               overflow: "hidden",
-              border: "2px solid #ccc",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+              border: "2px solid #e0e0e0",
+              boxShadow: "0 12px 32px rgba(0,0,0,0.1)",
               position: "relative",
               "& .slick-dots": {
-                bottom: 10,
+                bottom: 15,
                 "& li": {
-                  margin: "0 6px",
+                  margin: "0 5px",
                   "& button": {
                     "&:before": {
-                      fontSize: "10px",
-                      color: "#bbb",
+                      fontSize: "12px",
+                      color: "#888",
                       opacity: 1,
                     },
                   },
@@ -118,18 +105,22 @@ export default function HomePage() {
           >
             <Slider {...sliderSettings}>
               {products.map((product: Product) => (
-                <NextLink key={product.id} href={`/category/${product.id}`} passHref>
+                <NextLink
+                  key={product.id}
+                  href={`/category/${product.id}`}
+                  passHref
+                >
                   <Box
                     component="a"
                     sx={{
                       display: "block",
                       position: "relative",
-                      height: { xs: 300, md: 450 },
-                      backgroundImage: `url(/images/${product.images[0]})`,
+                      height: { xs: 300, md: 500 },
+                      backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.2)), url(/images/${product.images[0]})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
-                      color: "#fff",
                       textDecoration: "none",
+                      borderRadius: 4,
                       cursor: "pointer",
                     }}
                   >
@@ -140,43 +131,63 @@ export default function HomePage() {
                         left: 0,
                         width: "100%",
                         height: "100%",
-                        background: "rgba(0,0,0,0.4)",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "center",
                         alignItems: "center",
                         px: 2,
                         textAlign: "center",
+                        color: "#fff",
                       }}
                     >
-                      <Typography
-                        variant="h4"
-                        fontWeight={700}
-                        gutterBottom
-                        sx={{ textShadow: "1px 1px 4px rgba(0,0,0,0.8)" }}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
                       >
-                        {product.title}
-                      </Typography>
-                      <Typography
-                        variant="subtitle1"
-                        gutterBottom
-                        sx={{ textShadow: "1px 1px 3px rgba(0,0,0,0.7)" }}
-                      >
-                        {product.category}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          backgroundColor: "primary.main",
-                          px: 2,
-                          py: 0.5,
-                          borderRadius: 2,
-                          fontWeight: "bold",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
-                        }}
-                      >
-                        {product.price} JOD
-                      </Typography>
+                        <Typography
+                          variant="h3"
+                          fontWeight={800}
+                          gutterBottom
+                          sx={{
+                            textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
+                          }}
+                        >
+                          {product.title}
+                        </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          gutterBottom
+                          sx={{
+                            textShadow: "1px 1px 6px rgba(0,0,0,0.7)",
+                          }}
+                        >
+                          {product.category}
+                        </Typography>
+                        <Box
+                          component="button"
+                          sx={{
+                            mt: 2,
+                            backgroundColor: theme.palette.primary.main,
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "30px",
+                            px: 3,
+                            py: 1,
+                            fontWeight: "bold",
+                            fontSize: "1rem",
+                            cursor: "pointer",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                            transition: "all 0.3s ease",
+                            "&:hover": {
+                              backgroundColor: theme.palette.primary.dark,
+                              transform: "scale(1.05)",
+                            },
+                          }}
+                        >
+                          {product.price} JOD
+                        </Box>
+                      </motion.div>
                     </Box>
                   </Box>
                 </NextLink>
@@ -186,21 +197,17 @@ export default function HomePage() {
         </Container>
       </Box>
 
+      {/* Why Choose Section */}
       <Box
         component="section"
         sx={{
-          pt: 10,
-          pb: 5,
-          backgroundImage: "linear-gradient(rgba(240, 255, 240,0.9), #a5d6a7)",
-          color: "text.primary",
+          m: 0,
+          p: 0,
+          overflow: "hidden",
+          backgroundColor: "transparent",
         }}
       >
-        <Container maxWidth="md" sx={{ textAlign: "center" }}>
-          <Typography variant="h5" fontWeight={700} sx={{ mb: 6 }}>
-            Why Choose Us
-          </Typography>
-          <WhyChoose />
-        </Container>
+        <WhyChoose />
       </Box>
 
       <Footer />

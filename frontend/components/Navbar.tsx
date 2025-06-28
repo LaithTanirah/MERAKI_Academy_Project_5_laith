@@ -27,6 +27,7 @@ import CartButton from "./CartButton";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
+// شعار أفوكادو SVG مُحسّن
 function AvocadoIcon({ size = 34, style = {} }) {
   return (
     <Box
@@ -36,16 +37,16 @@ function AvocadoIcon({ size = 34, style = {} }) {
         alignItems: "center",
         justifyContent: "center",
         mr: 1,
-        filter: "drop-shadow(0 2px 8px rgba(78, 170, 96, 0.15))",
+        filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.2))",
         ...style,
       }}
     >
       <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
-        <ellipse cx="20" cy="20" rx="16" ry="20" fill="#68c66b" />
-        <ellipse cx="20" cy="22" rx="13" ry="16" fill="#4eaa60" />
+        <ellipse cx="20" cy="20" rx="16" ry="20" fill="#388e3c" />
+        <ellipse cx="20" cy="22" rx="13" ry="16" fill="#2e7d32" />
         <ellipse cx="20" cy="26" rx="8.5" ry="9.5" fill="#f9eac0" />
         <ellipse cx="20" cy="27" rx="5" ry="6" fill="#ad7c51" />
-        <ellipse cx="20" cy="28" rx="2" ry="2.5" fill="#84583b" />
+        <ellipse cx="20" cy="28" rx="2" ry="2.5" fill="#6d4c41" />
       </svg>
     </Box>
   );
@@ -65,7 +66,7 @@ export default function Navbar() {
     router.push("/");
   };
 
-  const iconBg = alpha("#FFFFFF", 0.15);
+  const iconBg = alpha("#FFFFFF", 0.12);
   const iconHoverBg = alpha("#FFFFFF", 0.25);
 
   return (
@@ -74,20 +75,21 @@ export default function Navbar() {
         position="sticky"
         elevation={0}
         sx={{
-          background: "linear-gradient(90deg, #68c66b 0%, #4eaa60 100%)",
-          boxShadow: "0 8px 32px 0 rgba(78, 170, 96, 0.12)",
-          borderBottom: "1px solid rgba(80, 200, 120, 0.1)",
-          backdropFilter: "blur(8px)",
+          background: "linear-gradient(90deg, #388e3c 0%, #2e7d32 100%)",
+          boxShadow: "0 6px 24px rgba(34, 139, 34, 0.2)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          backdropFilter: "blur(10px)",
           zIndex: 1000,
         }}
       >
         <Toolbar
           sx={{
             justifyContent: "space-between",
-            minHeight: 76,
+            minHeight: 80,
             px: { xs: 1, md: 4 },
           }}
         >
+          {/* START LEFT SIDE */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <motion.div whileTap={{ scale: 0.9 }}>
               <IconButton
@@ -96,15 +98,14 @@ export default function Navbar() {
                 sx={{
                   bgcolor: iconBg,
                   borderRadius: 2,
-                  transition: "all 0.25s cubic-bezier(.4,0,.2,1)",
-                  boxShadow: "0 2px 6px 0 rgba(80, 200, 120, 0.1)",
-                  backdropFilter: "blur(6px)",
+                  transition: "0.3s",
                   "&:hover": { bgcolor: iconHoverBg },
                 }}
               >
                 <MenuIcon />
               </IconButton>
             </motion.div>
+
             <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
               <AvocadoIcon />
               <Typography
@@ -113,35 +114,38 @@ export default function Navbar() {
                 href="/home"
                 sx={{
                   textDecoration: "none",
-                  color: "#FFFFFF",
+                  color: "#fff",
                   fontWeight: 900,
-                  letterSpacing: 2,
                   fontFamily: "'Poppins', sans-serif",
-                  textShadow: "0 2px 12px rgba(34, 139, 34, 0.16)",
-                  mx: 0.7,
-                  fontSize: { xs: 23, md: 28 },
-                  lineHeight: 1.3,
+                  letterSpacing: 1.8,
+                  fontSize: { xs: 22, md: 26 },
+                  ml: 0.5,
                 }}
               >
                 Avocado
               </Typography>
             </Box>
           </Box>
+          {/* END LEFT SIDE */}
 
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
+          {/* START SEARCHBAR */}
+          <Box
+            sx={{ flex: 1, maxWidth: 500, mx: 2 }}
+            component={motion.div}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.16 }}
-            style={{ flex: 1, maxWidth: 500 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
           >
             <SearchBar />
-          </motion.div>
+          </Box>
+          {/* END SEARCHBAR */}
 
+          {/* START ACTION BUTTONS */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             {[
               ["/FavoriteProducts", <FavoriteBorderIcon key="fav" />],
               ["/cart", <CartButton key="cart" />],
-            ].map(([href, Icon], idx) => (
+            ].map(([href, icon], idx) => (
               <motion.div
                 key={idx}
                 whileHover={{ scale: 1.1 }}
@@ -153,25 +157,22 @@ export default function Navbar() {
                   sx={{
                     bgcolor: iconBg,
                     borderRadius: 2,
-                    transition: "all 0.25s cubic-bezier(.4,0,.2,1)",
-                    boxShadow: "0 2px 6px 0 rgba(80, 200, 120, 0.1)",
                     "&:hover": { bgcolor: iconHoverBg },
                   }}
                 >
-                  {Icon}
+                  {icon}
                 </IconButton>
               </motion.div>
             ))}
 
-            <motion.div whileHover={{ rotate: 18 }} whileTap={{ rotate: 0 }}>
+            {/* LOGOUT BUTTON */}
+            <motion.div whileHover={{ rotate: 15 }} whileTap={{ rotate: 0 }}>
               <IconButton
                 color="inherit"
                 onClick={handleLogout}
                 sx={{
                   bgcolor: iconBg,
                   borderRadius: 2,
-                  transition: "all 0.25s cubic-bezier(.4,0,.2,1)",
-                  boxShadow: "0 2px 6px 0 rgba(80, 200, 120, 0.1)",
                   "&:hover": { bgcolor: iconHoverBg },
                 }}
               >
@@ -179,32 +180,34 @@ export default function Navbar() {
               </IconButton>
             </motion.div>
           </Box>
+          {/* END ACTION BUTTONS */}
         </Toolbar>
       </AppBar>
 
+      {/* DRAWER MENU */}
       <Drawer
         anchor="left"
         open={drawerOpen}
         onClose={toggleDrawer(false)}
         PaperProps={{
           sx: {
-            background: "linear-gradient(135deg, #4eaa60 30%, #68c66b 100%)",
-            color: "#FFFFFF",
-            borderTopRightRadius: 32,
-            borderBottomRightRadius: 16,
-            boxShadow: "0 8px 36px 0 rgba(78, 170, 96, 0.17)",
+            background: "linear-gradient(135deg, #2e7d32 20%, #388e3c 100%)",
+            color: "#fff",
+            borderTopRightRadius: 28,
+            borderBottomRightRadius: 14,
+            boxShadow: "0 6px 28px rgba(34, 139, 34, 0.2)",
             border: "none",
           },
         }}
       >
         <motion.div
-          initial={{ x: -100, opacity: 0 }}
+          initial={{ x: -80, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 170 }}
+          transition={{ type: "spring", stiffness: 160 }}
         >
           <Box
             sx={{
-              width: 270,
+              width: 260,
               height: "100%",
               px: 1,
             }}
@@ -217,12 +220,12 @@ export default function Navbar() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                height: 68,
+                height: 70,
                 fontWeight: 900,
                 fontSize: 22,
                 fontFamily: "'Poppins', sans-serif",
-                borderBottom: "1.5px solid rgba(255,255,255,0.22)",
-                letterSpacing: 1.7,
+                borderBottom: "1px solid rgba(255,255,255,0.15)",
+                letterSpacing: 1.6,
                 mb: 2,
               }}
             >
@@ -232,38 +235,27 @@ export default function Navbar() {
             <List>
               {[
                 { text: "Home", icon: <HomeIcon />, link: "/home" },
-                {
-                  text: "Favorites",
-                  icon: <FavoriteBorderIcon />,
-                  link: "/FavoriteProducts",
-                },
-                { text: "Orders", icon: <ShoppingBagIcon />, link: "/orders" }, // <-- NEW ORDERS ITEM
-                {
-                  text: "Contact Us",
-                  icon: <ContactMailIcon />,
-                  link: "/contact",
-                },
+                { text: "Favorites", icon: <FavoriteBorderIcon />, link: "/FavoriteProducts" },
+                { text: "Orders", icon: <ShoppingBagIcon />, link: "/orders" },
+                { text: "Contact", icon: <ContactMailIcon />, link: "/contact" },
               ].map(({ text, icon, link }) => (
                 <Link key={text} href={link} passHref legacyBehavior>
                   <ListItem
                     component="a"
                     sx={{
-                      color: "#FFFFFF",
+                      color: "#fff",
                       fontWeight: 600,
                       borderRadius: 1.5,
-                      mb: 1,
                       mx: 0.5,
                       px: 2.5,
                       py: 1.3,
+                      mb: 1,
                       "&:hover": {
                         bgcolor: alpha("#FFFFFF", 0.15),
                         pl: 3,
-                        transition: "all 0.25s cubic-bezier(.4,0,.2,1)",
-                        boxShadow: "0 1px 6px 0 rgba(255,255,255,0.1)",
+                        transition: "0.3s",
                       },
-                      "& .MuiListItemIcon-root": {
-                        color: "#FFFFFF",
-                      },
+                      "& .MuiListItemIcon-root": { color: "#fff" },
                     }}
                   >
                     <ListItemIcon>{icon}</ListItemIcon>
