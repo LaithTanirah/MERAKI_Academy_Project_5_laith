@@ -96,20 +96,31 @@ const checkoutCart = async (req: Request, res: Response): Promise<void> => {
 // Get all unclaimed orders: carts with is_deleted = true and no delivery_person assigned
 const getUnclaimedOrders = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const { rows } = await pool.query(
-      `SELECT 
-         c.id      AS cart_id,
-         c.user_id,
-         c.status
-       FROM cart c
-       WHERE c.delivery_person_id IS NULL
-         AND c.is_deleted = TRUE;`
-    );
+    const { rows } = await pool.query(`
+      SELECT 
+        c.id           AS cart_id,
+        c.user_id,
+        c.status,
+        l.location_name,
+        ST_Y(l.location::geometry) AS latitude,
+        ST_X(l.location::geometry) AS longitude
+      FROM cart c
+      LEFT JOIN LATERAL (
+        SELECT *
+        FROM locations
+        WHERE "UserId" = c.user_id
+        ORDER BY location_id DESC
+        LIMIT 1
+      ) l ON true
+      WHERE c.delivery_person_id IS NULL
+        AND c.is_deleted = TRUE;
+    `);
     res.status(200).json({ success: true, result: rows });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
 
 // Claim an order: assign a delivery person to the first unclaimed cart
 const claimOrder = async (req: Request, res: Response): Promise<void> => {
@@ -138,21 +149,31 @@ const claimOrder = async (req: Request, res: Response): Promise<void> => {
 const getMyOrders = async (req: Request, res: Response): Promise<void> => {
   const { deliveryPersonId } = req.params;
   try {
-    const { rows } = await pool.query(
-      `SELECT 
-         c.id      AS cart_id,
-         c.user_id,
-         c.status
-       FROM cart c
-       WHERE c.delivery_person_id = $1
-         AND c.is_deleted = TRUE;`,
-      [deliveryPersonId]
-    );
+    const { rows } = await pool.query(`
+      SELECT 
+        c.id           AS cart_id,
+        c.user_id,
+        c.status,
+        l.location_name,
+        ST_Y(l.location::geometry) AS latitude,
+        ST_X(l.location::geometry) AS longitude
+      FROM cart c
+      LEFT JOIN LATERAL (
+        SELECT *
+        FROM locations
+        WHERE "UserId" = c.user_id
+        ORDER BY location_id DESC
+        LIMIT 1
+      ) l ON true
+      WHERE c.delivery_person_id = $1
+        AND c.is_deleted = TRUE;
+    `, [deliveryPersonId]);
     res.status(200).json({ success: true, result: rows });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
 
 // Mark an order as Delivered
 const deliverOrder = async (req: Request, res: Response): Promise<void> => {

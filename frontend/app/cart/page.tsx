@@ -245,7 +245,7 @@ const ShoppingCart: React.FC = () => {
       const res = await axios.post(
         "/location",
         {
-          user_id: userId,
+          userId: userId,
           location_name: location.name,
           latitude: location.lat,
           longitude: location.lng,
