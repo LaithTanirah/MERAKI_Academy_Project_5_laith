@@ -168,30 +168,45 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 // Get All Users (for Admin)
 // -----------------------
 // src/controllers/auth.ts
-export const getAllUsers = async (_req: Request, res: Response): Promise<void> => {
+// -----------------------
+// Get All Users (for Admin)
+// -----------------------
+export const getAllUsers = async (
+  _req: Request,
+  res: Response
+): Promise<void> => {
   try {
+    // include phone_number in query
     const { rows } = await pool.query(
-      `SELECT id, first_name, last_name, role_id, is_suspended
-         FROM users
-        WHERE is_deleted = FALSE`
+      `SELECT id, first_name, last_name, email, role_id, is_suspended, phone_number
+       FROM users
+       WHERE is_deleted = FALSE`
     );
-    const result = rows.map(user => ({
+
+    // map results with phone
+    const result = rows.map((user) => ({
       id: user.id.toString(),
-      name: `${user.first_name} ${user.last_name}`,
-      role:
-        user.role_id === 1
-          ? "Admin"
-          : user.role_id === 4
-          ? "Delivery"
-          : "Customer",
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      role_id: user.role_id,
+      is_suspended: user.is_suspended,
+      phone_number: user.phone_number,
       avatar:
         user.role_id === 1
           ? "/avatars/admin.png"
           : user.role_id === 4
           ? "/avatars/delivery.png"
           : "/avatars/customer.png",
-      is_suspended: user.is_suspended
+      role:
+        user.role_id === 1
+          ? "Admin"
+          : user.role_id === 4
+          ? "Delivery"
+          : "Customer",
     }));
+
+    // send to frontend
     res.json(result);
   } catch (err) {
     console.error("Error fetching users:", err);
@@ -312,11 +327,12 @@ export const getProfile = async (
   const userId = (req as any).token.userId;
   try {
     const { rows } = await pool.query(
-      `SELECT id, first_name, last_name, email, role_id, is_suspended
-         FROM users
-        WHERE id = $1`,
+      `SELECT id, first_name, last_name, email, phone_number, role_id, is_suspended
+       FROM users
+       WHERE id = $1`,
       [userId]
     );
+
     if (!rows.length) return res.status(404).json({ message: "Not found" });
     res.json(rows[0]);
   } catch (err) {
@@ -324,7 +340,10 @@ export const getProfile = async (
     res.status(500).json({ message: "Error fetching profile" });
   }
 };
-export const getUserById = async (req: Request, res: Response): Promise<void> => {
+export const getUserById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const userId = Number(req.params.id);
   try {
     const { rows } = await pool.query(
@@ -352,11 +371,126 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
       name: `${user.first_name} ${user.last_name}`,
       role,
       avatar,
-      online: true, 
+      online: true,
     });
   } catch (err) {
     console.error("Error fetching user by id:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+export const updateProfile = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    // userId from JWT
+    const userId = (req as any).token.userId;
+    const { first_name, last_name, email, phone_number } = req.body;
 
+    // check data
+    if (!first_name || !last_name || !email) {
+      res.status(400).json({ error: "Missing required fields." });
+      return;
+    }
+
+    // user deateals
+    const { rows: userRows } = await pool.query(
+      `SELECT id, role_id FROM users WHERE id = $1 AND is_deleted = FALSE`,
+      [userId]
+    );
+
+    if (!userRows.length) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const user = userRows[0];
+    const roleId = user.role_id;
+
+    // roles
+    // 1 = admin
+    // 3 = user
+    // 4 = delivery
+    if (![1, 3, 4].includes(roleId)) {
+      res
+        .status(403)
+        .json({ error: "You do not have permission to update profile." });
+      return;
+    }
+
+    //check email
+    const { rows: existing } = await pool.query(
+      `SELECT id FROM users WHERE email = $1 AND id != $2`,
+      [email, userId]
+    );
+
+    if (existing.length) {
+      res.status(400).json({ error: "Email is already used by another user." });
+      return;
+    }
+
+    // Updated
+    const { rows: updated } = await pool.query(
+      `UPDATE users
+       SET first_name = $1, last_name = $2, email = $3, phone_number = $4
+       WHERE id = $5
+       RETURNING id, first_name, last_name, email, phone_number, role_id`,
+      [first_name, last_name, email, phone_number, userId]
+    );
+
+    res.json({
+      message: "Profile updated successfully.",
+      user: updated[0],
+    });
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    res.status(500).json({ message: "Error updating profile." });
+  }
+};
+export const changePassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = (req as any).token.userId;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      res.status(400).json({ error: "All fields are required." });
+      return;
+    }
+
+  
+    const { rows } = await pool.query(
+      `SELECT password FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (!rows.length) {
+      res.status(404).json({ error: "User not found." });
+      return;
+    }
+
+    const currentHashed = rows[0].password;
+
+    const isMatch = await bcrypt.compare(oldPassword, currentHashed);
+    if (!isMatch) {
+      res.status(400).json({ error: "Old password is incorrect." });
+      return;
+    }
+
+   
+    const salt = bcrypt.genSaltSync(10);
+    const hashedNew = bcrypt.hashSync(newPassword, salt);
+
+    await pool.query(
+      `UPDATE users SET password = $1 WHERE id = $2`,
+      [hashedNew, userId]
+    );
+
+    res.json({ message: "Password updated successfully." });
+  } catch (err) {
+    console.error("Change password error:", err);
+    res.status(500).json({ error: "Something went wrong." });
+  }
+};

@@ -88,7 +88,7 @@ export default function Footer() {
               {[
                 { name: "Mohammad", img: "/images/mohammad.jpg" },
                 { name: "Laith", img: "/images/laith.jpeg" },
-                { name: "Hassan", img: "/founders/hassan.jpg" },
+                { name: "Hassan", img: "/images/Hasan_pic.jpg" },
               ].map(({ name, img }, idx) => (
                 <Box
                   key={idx}

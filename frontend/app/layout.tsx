@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import ChatWidget from "../components/ChatWidget";
-import DeliverySidebar from "../components/DeliverySidebar"; // تأكد إنه موجود
+import DeliverySidebar from "../components/DeliverySidebar"; 
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
