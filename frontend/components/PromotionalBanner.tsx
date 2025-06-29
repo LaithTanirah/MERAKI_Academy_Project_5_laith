@@ -23,6 +23,7 @@ export default function PromoBanner() {
   return (
     <Box
       sx={{
+        backgroundColor:"-moz-initial",
         position: "relative",
         height: { xs: 300, md: 420 },
         my: 8,
