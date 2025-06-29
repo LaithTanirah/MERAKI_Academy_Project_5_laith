@@ -10,9 +10,11 @@ import {
   suspendUser,
   unsuspendUser,
   getProfile,
-  getUserById
+  getUserById,
+  updateProfile,
+  changePassword,
 } from "../controllers/auth";
-import authenticateJWT  from "../middleware/authentication";
+import authenticateJWT from "../middleware/authentication";
 
 const router = Router();
 
@@ -49,5 +51,10 @@ router.put("/users/:id/unsuspend", authenticateJWT, unsuspendUser);
 router.delete("/users/:id", authenticateJWT, deleteUser);
 
 router.get("/users/:id", authenticateJWT, getUserById);
+
+//Update-Profile
+router.put("/profile", authenticateJWT, updateProfile);
+//change password
+router.put("/change-password", authenticateJWT, changePassword);
 
 export default router;
