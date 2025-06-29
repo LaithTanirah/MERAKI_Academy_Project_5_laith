@@ -56,31 +56,14 @@ export default function Footer() {
           {/* Brand & Team */}
           <Grid item xs={12} md={3}>
             <Box display="flex" alignItems="center" gap={2} mb={3}>
-              <img
-                src="/images/logo.jpg"
-                alt="Avocado Logo"
-                width={40}
-                height={40}
-                style={{
-                  objectFit: "contain",
-                  borderRadius: "6px",
-                  backgroundColor: "#fff",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                }}
-                onError={(e) =>
-                  ((e.target as HTMLImageElement).src = "/placeholder.png")
-                }
-              />
-              <Typography variant="h5" fontWeight="bold">
-                Avocado
-              </Typography>
+              <img src="logos/logo3.png" alt="Logo" style={{ width: 120,marginLeft:50 }} />
             </Box>
 
             <Typography
               variant="subtitle1"
               fontWeight="bold"
               mb={2}
-              sx={{ color: "#e0ffe0" }}
+              sx={{ color: "#e0ffe0" ,marginLeft:7.5}}
             >
               Meet the Team
             </Typography>

@@ -110,6 +110,7 @@ export default function AboutUs() {
           px: 2,
         }}
       >
+
         <Container maxWidth="lg">
           <Typography
             variant="h3"
@@ -117,7 +118,7 @@ export default function AboutUs() {
             gutterBottom
             color="text.primary"
           >
-            About Avocado
+            About<img src="logos/logo4.png" alt="Logo" style={{ width: 100 }} />Avocado
           </Typography>
           <Typography
             variant="body1"

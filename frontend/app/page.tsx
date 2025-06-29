@@ -188,6 +188,11 @@ export default function AuthSplitLayout() {
                   exit={{ opacity: 0, x: 100 }}
                   transition={{ duration: 0.5 }}
                 >
+                   <img
+                    src="logos/logo1.png"
+                    alt="Logo"
+                    style={{ width: 250, marginBottom: 50,marginLeft:50 }}
+                  />
                   <Typography variant="h3" fontWeight="bold" gutterBottom>
                     Welcome Back!
                   </Typography>
@@ -399,6 +404,11 @@ export default function AuthSplitLayout() {
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ duration: 0.5 }}
                 >
+                  <img
+                    src="logos/logo3.png"
+                    alt="Logo"
+                    style={{ width: 200, marginBottom: 16 }}
+                  />
                   <Typography variant="h3" fontWeight="bold">
                     New here?
                   </Typography>
