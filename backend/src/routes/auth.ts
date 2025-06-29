@@ -9,7 +9,8 @@ import {
   deleteUser,
   suspendUser,
   unsuspendUser,
-  getProfile
+  getProfile,
+  getUserById
 } from "../controllers/auth";
 import authenticateJWT  from "../middleware/authentication";
 
@@ -46,5 +47,7 @@ router.put("/users/:id/suspend", authenticateJWT, suspendUser);
 router.put("/users/:id/unsuspend", authenticateJWT, unsuspendUser);
 // Soft-delete a user
 router.delete("/users/:id", authenticateJWT, deleteUser);
+
+router.get("/users/:id", authenticateJWT, getUserById);
 
 export default router;

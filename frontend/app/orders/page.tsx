@@ -25,10 +25,12 @@ import {
 import { styled } from "@mui/system";
 import { Theme } from "@mui/material/styles";
 import { format } from "date-fns";
+import DeliveryReview from "@/components/DeliveryReview";
 
-// Set the base URL for all axios requests
+// Axios base URL
 axios.defaults.baseURL = "http://localhost:5000/api";
 
+// Types
 interface TokenPayload {
   userId: number;
 }
@@ -51,16 +53,16 @@ interface Order {
   total: number;
 }
 
-// Styled components for order and product rows
+// Styled
 const OrderCard = styled(Paper)(({ theme }: { theme: Theme }) => ({
   padding: theme.spacing(3),
   marginBottom: theme.spacing(3),
   borderRadius: theme.spacing(2),
   boxShadow: theme.shadows[3],
   animation: "fadeInUp 500ms ease-out",
-  '@keyframes fadeInUp': {
-    '0%': { opacity: 0, transform: 'translateY(10px)' },
-    '100%': { opacity: 1, transform: 'translateY(0)' },
+  "@keyframes fadeInUp": {
+    "0%": { opacity: 0, transform: "translateY(10px)" },
+    "100%": { opacity: 1, transform: "translateY(0)" },
   },
 }));
 
@@ -76,7 +78,7 @@ const ProductRow = styled(Box)(({ theme }: { theme: Theme }) => ({
   "&:last-child": { marginBottom: 0 },
 }));
 
-// Configuration for status badges
+// Status
 const statusConfig: Record<
   string,
   { color: "primary" | "success" | "warning" | "error"; icon: JSX.Element }
@@ -93,13 +95,13 @@ const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [openRow, setOpenRow] = useState<number | null>(null);
 
-  // Load JWT from localStorage
+  // Load JWT
   useEffect(() => {
     const t = localStorage.getItem("token");
     if (t) setToken(t);
   }, []);
 
-  // Decode token to extract userId
+  // Decode user
   useEffect(() => {
     if (!token) return;
     try {
@@ -110,7 +112,7 @@ const Orders: React.FC = () => {
     }
   }, [token]);
 
-  // Fetch orders for the authenticated user
+  // Fetch orders
   useEffect(() => {
     if (userId === null || !token) return;
     axios
@@ -118,11 +120,15 @@ const Orders: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        // Enrich orders with total, default status and date
         const enriched = res.data.result.map((o) => {
-          const status = o.status && statusConfig[o.status] ? o.status : "Processing";
+          const status =
+            o.status && statusConfig[o.status] ? o.status : "Processing";
           const date = o.date ? new Date(o.date) : new Date();
-          const total = o.products?.reduce((sum, p) => sum + (p.price || 0) * (p.quantity || 0), 0) || 0;
+          const total =
+            o.products?.reduce(
+              (sum, p) => sum + (p.price || 0) * (p.quantity || 0),
+              0
+            ) || 0;
           return { ...o, status, date, total };
         });
         setOrders(enriched);
@@ -136,9 +142,18 @@ const Orders: React.FC = () => {
   return (
     <Box
       p={3}
-      sx={{ minHeight: "100vh", background: "linear-gradient(to bottom, #C8FACC, #5F7F67)" }}
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(to bottom, #C8FACC, #5F7F67)",
+      }}
     >
-      <Stack direction="row" justifyContent="center" alignItems="center" spacing={1} mb={3}>
+      <Stack
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+        spacing={1}
+        mb={3}
+      >
         <CartIcon fontSize="large" />
         <Typography variant="h4" fontWeight="bold">
           Your Orders
@@ -150,12 +165,17 @@ const Orders: React.FC = () => {
       ) : (
         orders.map((order, idx) => (
           <OrderCard key={order.cart_id} sx={{ animationDelay: `${idx * 100}ms` }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={4}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              spacing={4}
+            >
               <Typography variant="h6" sx={{ fontFamily: "monospace" }}>
                 Order ID: {order.cart_id}
               </Typography>
               <Typography variant="body2">
-                <strong>Date:</strong> {format(new Date(order.date), "MMM dd, yyyy")}
+                <strong>Date:</strong> {format(order.date as Date, "MMM dd, yyyy")}
               </Typography>
               <Typography variant="body2">
                 <strong>Total:</strong> ${order.total.toFixed(2)}
@@ -180,13 +200,23 @@ const Orders: React.FC = () => {
               {order.products?.map((p, i) => (
                 <ProductRow key={i}>
                   <Typography sx={{ flex: 2 }}>{p.product_title}</Typography>
-                  <Typography sx={{ flex: 1, textAlign: "center" }}>Qty: {p.quantity}</Typography>
-                  <Typography sx={{ flex: 1, textAlign: "right", fontWeight: 600 }}>
+                  <Typography sx={{ flex: 1, textAlign: "center" }}>
+                    Qty: {p.quantity}
+                  </Typography>
+                  <Typography
+                    sx={{ flex: 1, textAlign: "right", fontWeight: 600 }}
+                  >
                     ${p.price.toFixed(2)}
                   </Typography>
                 </ProductRow>
               ))}
             </Collapse>
+
+            {order.status === "Delivered" && (
+              <Box sx={{ mt: 2, px: 2 }}>
+                <DeliveryReview orderId={order.cart_id} />
+              </Box>
+            )}
           </OrderCard>
         ))
       )}
