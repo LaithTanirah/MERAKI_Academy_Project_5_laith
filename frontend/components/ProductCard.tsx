@@ -14,7 +14,7 @@ interface ProductCardProps {
   id: string;
   title: string;
   description: string;
-  price: number;
+  price: number | null | undefined;
   image: string;
   category: string;
 }
@@ -85,7 +85,7 @@ export default function ProductCard({
             color="success.main"
             sx={{ mt: 1, fontWeight: 700 }}
           >
-            ${price.toFixed(2)}
+            {price != null ? `$${price.toFixed(2)}` : "Price unavailable"}
           </Typography>
         </CardContent>
       </CardActionArea>

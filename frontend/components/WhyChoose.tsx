@@ -33,7 +33,7 @@ export default function WhyChoose() {
         py: { xs: 6, md: 10 },
         my: 6,
         overflowX: 'hidden',
-        backgroundColor: '#e8f5e9',
+        backgroundColor: '-moz-initial',
       }}
     >
       <Box

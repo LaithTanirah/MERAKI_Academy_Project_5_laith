@@ -18,6 +18,7 @@ export default function ProductsPage() {
       .then(setProducts)
       .catch((err) => setError(err.message));
   }, []);
+
   console.log(products);
   
 
@@ -34,7 +35,7 @@ export default function ProductsPage() {
         Loading…
       </Typography>
     );
-
+  console.log(products);
   return (
     <Box
       sx={{

@@ -8,7 +8,7 @@ export default function ShopHero() {
   return (
     <Box
       sx={{
-        background: "linear-gradient(180deg, #2e7d32 0%, #ffffff 100%)", // dark green gradient
+        background: "linear-gradient(180deg, #2e7d32 0%,rgb(248, 252, 247) 100%)", // dark green gradient
         py: { xs: 10, md: 14 },
       }}
     >

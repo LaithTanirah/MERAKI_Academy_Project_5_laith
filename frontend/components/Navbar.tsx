@@ -235,9 +235,22 @@ export default function Navbar() {
             <List>
               {[
                 { text: "Home", icon: <HomeIcon />, link: "/home" },
-                { text: "Favorites", icon: <FavoriteBorderIcon />, link: "/FavoriteProducts" },
+                {
+                  text: "Favorites",
+                  icon: <FavoriteBorderIcon />,
+                  link: "/FavoriteProducts",
+                },
                 { text: "Orders", icon: <ShoppingBagIcon />, link: "/orders" },
-                { text: "Contact", icon: <ContactMailIcon />, link: "/contact" },
+                {
+                  text: "About Us",
+                  icon: <i className="fas fa-users" />,
+                  link: "/aboutUs",
+                },
+                {
+                  text: "Contact",
+                  icon: <ContactMailIcon />,
+                  link: "/contactUs",
+                },
               ].map(({ text, icon, link }) => (
                 <Link key={text} href={link} passHref legacyBehavior>
                   <ListItem

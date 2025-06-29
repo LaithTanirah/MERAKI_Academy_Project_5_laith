@@ -62,6 +62,7 @@ export default function HomePage() {
     autoplaySpeed: 2000,
     arrows: false,
   };
+  console.log(products);
 
   return (
     <main style={{ backgroundColor: "#f1fef4", minHeight: "100vh" }}>
@@ -76,7 +77,7 @@ export default function HomePage() {
       </Box>
 
       {/* Slider Section */}
-      <Box sx={{ py: 4, px: 0, mt: 0, backgroundColor: "transparent" }}>
+      <Box sx={{ py: 4, px: 0, mt: 0, backgroundColor: "-moz-initia" }}>
         <Container maxWidth="lg" sx={{ px: { xs: 1, md: 0 } }}>
           <Box
             sx={{
@@ -104,94 +105,98 @@ export default function HomePage() {
             }}
           >
             <Slider {...sliderSettings}>
-              {products.map((product: Product) => (
-                <NextLink
-                  key={product.id}
-                  href={`/category/${product.id}`}
-                  passHref
-                >
-                  <Box
-                    component="a"
-                    sx={{
-                      display: "block",
-                      position: "relative",
-                      height: { xs: 300, md: 500 },
-                      backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.2)), url(/images/${product.images[0]})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      textDecoration: "none",
-                      borderRadius: 4,
-                      cursor: "pointer",
-                    }}
+              {products.map((product: Product) => {
+                const image = product.images?.[0] || "offer1.jpg";
+
+                return (
+                  <NextLink
+                    key={product.id}
+                    href={`/category/${product.id}`}
+                    passHref
                   >
                     <Box
+                      component="a"
                       sx={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        px: 2,
-                        textAlign: "center",
-                        color: "#fff",
+                        display: "block",
+                        position: "relative",
+                        height: { xs: 300, md: 500 },
+                        backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.2)), url(/images/${image})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        textDecoration: "none",
+                        borderRadius: 4,
+                        cursor: "pointer",
                       }}
                     >
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          px: 2,
+                          textAlign: "center",
+                          color: "#fff",
+                        }}
                       >
-                        <Typography
-                          variant="h3"
-                          fontWeight={800}
-                          gutterBottom
-                          sx={{
-                            textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
-                          }}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.8 }}
                         >
-                          {product.title}
-                        </Typography>
-                        <Typography
-                          variant="subtitle1"
-                          gutterBottom
-                          sx={{
-                            textShadow: "1px 1px 6px rgba(0,0,0,0.7)",
-                          }}
-                        >
-                          {product.category}
-                        </Typography>
-                        <Box
-                          component="button"
-                          sx={{
-                            mt: 2,
-                            backgroundColor: theme.palette.primary.main,
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "30px",
-                            px: 3,
-                            py: 1,
-                            fontWeight: "bold",
-                            fontSize: "1rem",
-                            cursor: "pointer",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              backgroundColor: theme.palette.primary.dark,
-                              transform: "scale(1.05)",
-                            },
-                          }}
-                        >
-                          {product.price} JOD
-                        </Box>
-                      </motion.div>
+                          <Typography
+                            variant="h3"
+                            fontWeight={800}
+                            gutterBottom
+                            sx={{
+                              textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
+                            }}
+                          >
+                            {product.title}
+                          </Typography>
+                          <Typography
+                            variant="subtitle1"
+                            gutterBottom
+                            sx={{
+                              textShadow: "1px 1px 6px rgba(0,0,0,0.7)",
+                            }}
+                          >
+                            {product.category}
+                          </Typography>
+                          <Box
+                            component="button"
+                            sx={{
+                              mt: 2,
+                              backgroundColor: theme.palette.primary.main,
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "30px",
+                              px: 3,
+                              py: 1,
+                              fontWeight: "bold",
+                              fontSize: "1rem",
+                              cursor: "pointer",
+                              boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                              transition: "all 0.3s ease",
+                              "&:hover": {
+                                backgroundColor: theme.palette.primary.dark,
+                                transform: "scale(1.05)",
+                              },
+                            }}
+                          >
+                            {product.price} JOD
+                          </Box>
+                        </motion.div>
+                      </Box>
                     </Box>
-                  </Box>
-                </NextLink>
-              ))}
+                  </NextLink>
+                );
+              })}
             </Slider>
           </Box>
         </Container>
@@ -204,7 +209,7 @@ export default function HomePage() {
           m: 0,
           p: 0,
           overflow: "hidden",
-          backgroundColor: "transparent",
+          backgroundColor: "-moz-initial",
         }}
       >
         <WhyChoose />

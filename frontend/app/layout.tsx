@@ -56,6 +56,11 @@ export default function RootLayout({
 
   return (
     <html lang="en" style={{ height: "100%" }}>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet"
+      />
+
       <body
         style={{
           minHeight: "100vh",
