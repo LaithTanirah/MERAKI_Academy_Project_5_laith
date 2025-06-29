@@ -17,9 +17,8 @@ import rolePermissionRoutes from "./src/routes/rolePermission";
 import favoriteRouter from "./src/routes/favorite";
 
 import locationsRouter from "./src/routes/location";
-
-
 import dashboardRoutes from "./src/routes/dashboard";
+import deliveryReviewsRoutes from './src/routes/deliveryReviews';
 
 // --- SOCKET.IO SETUP ---
 import { createServer } from "http";
@@ -60,7 +59,7 @@ io.on("connection", (socket) => {
   socket.on("send-message", ({ roomId, message, sender }) => {
     if (sender === "user") {
       // Send the message to the user room (so user sees their message)
-      io.to(roomId).emit("receive-message", { sender, message });
+      io.to(roomId).emit("receive-message", { sender, message, roomId });
 
       // Send the message to the admin room so admins can see it
       io.to("admin-room").emit("receive-message", {
@@ -75,6 +74,7 @@ io.on("connection", (socket) => {
       io.to(roomId).emit("receive-message", {
         sender: "admin",
         message,
+        roomId,
       });
     }
   });
@@ -107,11 +107,9 @@ app.use("/api/cartProduct", cartProductRouter);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/rolePermissions", rolePermissionRoutes);
 app.use("/api/favorite", favoriteRouter);
-
 app.use("/api/location", locationsRouter);
-
-
 app.use("/api/dashboard", dashboardRoutes);
+app.use('/api', deliveryReviewsRoutes);
 
 // --- DEFAULT ROUTE ---
 app.get("/", (req, res) => {

@@ -20,6 +20,13 @@ interface ChatMessage {
   roomId?: string;
 }
 
+interface UserData {
+  id: string;
+  name: string;
+  role: "Customer" | "Delivery" | "Admin";
+  avatar?: string;
+}
+
 export default function AdvancedChatWidget() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -27,8 +34,9 @@ export default function AdvancedChatWidget() {
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [unread, setUnread] = useState(0);
   const [typing, setTyping] = useState(false);
-  const [language, setLanguage] = useState<"en" | "ar" | null>(null); // null = not selected yet
-  const [showLanguageDialog, setShowLanguageDialog] = useState(false); // controls language modal
+  const [language, setLanguage] = useState<"en" | "ar" | null>(null);
+  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const socketRef = useRef<any>();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -56,6 +64,13 @@ export default function AdvancedChatWidget() {
 
     const socket = io("http://localhost:5000");
     socketRef.current = socket;
+
+    // fetch user data from your backend
+    fetch(`/api/users/${userId}`)
+      .then((res) => res.json())
+      .then((data) => setUserData(data))
+      .catch(console.error);
+
     socket.emit("join-room", { roomId: userId, isAdmin: false });
 
     const welcomeMsg =
@@ -129,7 +144,6 @@ export default function AdvancedChatWidget() {
 
   return (
     <>
-      {/* نافذة اختيار اللغة تظهر فقط عند الضغط على زر الشات */}
       <Dialog open={showLanguageDialog}>
         <DialogTitle sx={{ textAlign: "center" }}>اختر اللغة / Choose Language</DialogTitle>
         <DialogActions sx={{ justifyContent: "center" }}>
@@ -137,7 +151,7 @@ export default function AdvancedChatWidget() {
             onClick={() => {
               setLanguage("ar");
               setShowLanguageDialog(false);
-              setOpen(true); // افتح الشات بعد اختيار اللغة
+              setOpen(true);
             }}
             variant="contained"
           >
@@ -147,7 +161,7 @@ export default function AdvancedChatWidget() {
             onClick={() => {
               setLanguage("en");
               setShowLanguageDialog(false);
-              setOpen(true); // افتح الشات بعد اختيار اللغة
+              setOpen(true);
             }}
             variant="outlined"
           >
@@ -156,7 +170,6 @@ export default function AdvancedChatWidget() {
         </DialogActions>
       </Dialog>
 
-      {/* زر الشات العائم */}
       <Badge color="error" badgeContent={unread} invisible={unread === 0}>
         <IconButton
           onClick={() => {
@@ -201,10 +214,16 @@ export default function AdvancedChatWidget() {
                 boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
               }}
             >
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography variant="h6">
-                  {language === "ar" ? "تحدث معنا" : "Chat with us"}
-                </Typography>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Avatar src={userData?.avatar}>{userData?.name?.charAt(0) ?? "U"}</Avatar>
+                  <Box>
+                    <Typography variant="body1" fontWeight="bold">
+                      {userData?.name || "Guest"}
+                    </Typography>
+                    <Chip label={userData?.role || "Customer"} size="small" />
+                  </Box>
+                </Box>
                 <Button size="small" color="error" onClick={() => setOpen(false)}>
                   ✖
                 </Button>
@@ -236,7 +255,7 @@ export default function AdvancedChatWidget() {
                         }}
                       >
                         <Avatar sx={{ bgcolor: msg.sender === "admin" ? "#3949ab" : "#66bb6a" }}>
-                          {msg.sender === "admin" ? "A" : "U"}
+                          {msg.sender === "admin" ? "A" : (userData?.name?.charAt(0) ?? "U")}
                         </Avatar>
                         <Box
                           sx={{

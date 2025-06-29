@@ -142,11 +142,18 @@ export default function AdminProductsPage() {
   const filteredProducts =
     filterCategory === "All"
       ? products
-      : products.filter((p) => getCategoryTitle(p.categoryid) === filterCategory);
+      : products.filter(
+          (p) => getCategoryTitle(p.categoryid) === filterCategory
+        );
 
   return (
     <Box sx={{ backgroundColor: "#f5fdf6", minHeight: "100vh", py: 4, px: 3 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Typography variant="h4" fontWeight="bold">
           🛒 Products Management
         </Typography>
@@ -193,7 +200,13 @@ export default function AdminProductsPage() {
         </Box>
       </Stack>
 
-      <Box display="flex" flexWrap="wrap" gap={3} justifyContent="center" alignItems="stretch">
+      <Box
+        display="flex"
+        flexWrap="wrap"
+        gap={3}
+        justifyContent="center"
+        alignItems="stretch"
+      >
         {filteredProducts.map((p) => (
           <Card
             key={p.id}
@@ -220,8 +233,9 @@ export default function AdminProductsPage() {
             <CardContent>
               <Typography variant="h6">{p.title}</Typography>
               <Typography variant="body1" color="text.primary">
-                {p.price} JD
+                {p.price != null ? `${p.price.toFixed(2)} JD` : "Price N/A"}
               </Typography>
+
               <Chip
                 label={getCategoryTitle(p.categoryid)}
                 color="success"
@@ -258,39 +272,93 @@ export default function AdminProductsPage() {
         ))}
       </Box>
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <Box component="form" onSubmit={handleSubmit}>
           <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <ShoppingCartIcon color="primary" />
             {editing ? "Edit Product" : "Add Product"}
           </DialogTitle>
           <DialogContent dividers>
-            <TextField name="title" label="Title" fullWidth defaultValue={editing?.title || ""} margin="normal" required />
-            <TextField name="price" label="Price" type="number" fullWidth defaultValue={editing?.price || ""} margin="normal" required />
+            <TextField
+              name="title"
+              label="Title"
+              fullWidth
+              defaultValue={editing?.title || ""}
+              margin="normal"
+              required
+            />
+            <TextField
+              name="price"
+              label="Price"
+              type="number"
+              fullWidth
+              defaultValue={editing?.price || ""}
+              margin="normal"
+              required
+            />
             <FormControl fullWidth margin="normal">
               <InputLabel id="category-label">Category</InputLabel>
-              <Select labelId="category-label" name="categoryid" label="Category" defaultValue={editing?.categoryid || ""} required>
+              <Select
+                labelId="category-label"
+                name="categoryid"
+                label="Category"
+                defaultValue={editing?.categoryid || ""}
+                required
+              >
                 {categories.map((cat) => (
-                  <MenuItem key={cat.id} value={cat.id}>{cat.title}</MenuItem>
+                  <MenuItem key={cat.id} value={cat.id}>
+                    {cat.title}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            <TextField name="description" label="Description" fullWidth defaultValue={editing?.description || ""} margin="normal" multiline />
-            <TextField name="size" label="Size (comma-separated)" fullWidth defaultValue={editing?.size.join(",") || ""} margin="normal" />
-            <TextField name="images" label="Images URLs (comma-separated)" fullWidth defaultValue={editing?.images.join(",") || ""} margin="normal" />
+            <TextField
+              name="description"
+              label="Description"
+              fullWidth
+              defaultValue={editing?.description || ""}
+              margin="normal"
+              multiline
+            />
+            <TextField
+              name="size"
+              label="Size (comma-separated)"
+              fullWidth
+              defaultValue={editing?.size.join(",") || ""}
+              margin="normal"
+            />
+            <TextField
+              name="images"
+              label="Images URLs (comma-separated)"
+              fullWidth
+              defaultValue={editing?.images.join(",") || ""}
+              margin="normal"
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="contained">{editing ? "Save" : "Create"}</Button>
+            <Button type="submit" variant="contained">
+              {editing ? "Save" : "Create"}
+            </Button>
           </DialogActions>
         </Box>
       </Dialog>
 
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete <strong>{productToDelete?.title}</strong>? This action cannot be undone.
+            Are you sure you want to delete{" "}
+            <strong>{productToDelete?.title}</strong>? This action cannot be
+            undone.
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -323,8 +391,12 @@ export default function AdminProductsPage() {
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={showSuccess} autoHideDuration={3000} onClose={() => setShowSuccess(false)}>
-        <Alert severity="success" sx={{ width: '100%' }}>
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccess(false)}
+      >
+        <Alert severity="success" sx={{ width: "100%" }}>
           Operation completed successfully!
         </Alert>
       </Snackbar>

@@ -39,7 +39,8 @@ export const googleCallback = (
 // -----------------------
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { first_name, last_name, email, password, phone_number, role_id } = req.body;
+    const { first_name, last_name, email, password, phone_number, role_id } =
+      req.body;
 
     // Validate required fields
     if (!first_name || !last_name || !email || !password) {
@@ -71,15 +72,22 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, first_name, last_name, email, role_id, is_suspended
       `,
-      [first_name, last_name, email, hashedPassword, phone_number || null, assignedRoleId]
+      [
+        first_name,
+        last_name,
+        email,
+        hashedPassword,
+        phone_number || null,
+        assignedRoleId,
+      ]
     );
     const user = userRows[0];
 
     // Create active cart for new user
-    await pool.query(
-      `INSERT INTO cart (user_id, status) VALUES ($1, $2)`,
-      [user.id, "ACTIVE"]
-    );
+    await pool.query(`INSERT INTO cart (user_id, status) VALUES ($1, $2)`, [
+      user.id,
+      "ACTIVE",
+    ]);
 
     // Get cart ID
     const { rows: cartRows } = await pool.query(
@@ -128,11 +136,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     // If user is suspended, block access
     if (user.is_suspended) {
-      return res.status(403).json({ error: "Account suspended. Please contact admin." });
+      return res
+        .status(403)
+        .json({ error: "Account suspended. Please contact admin." });
     }
 
     // Generate token
-    const token = JWT.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1h" });
+    const token = JWT.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.status(200).json({
       message: "Login successful.",
@@ -142,7 +154,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         last_name: user.last_name,
         email: user.email,
         role_id: user.role_id,
-        is_suspended: user.is_suspended
+        is_suspended: user.is_suspended,
       },
       token,
     });
@@ -155,14 +167,32 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 // -----------------------
 // Get All Users (for Admin)
 // -----------------------
+// src/controllers/auth.ts
 export const getAllUsers = async (_req: Request, res: Response): Promise<void> => {
   try {
     const { rows } = await pool.query(
-      `SELECT id, first_name, last_name, email, role_id, is_suspended
+      `SELECT id, first_name, last_name, role_id, is_suspended
          FROM users
         WHERE is_deleted = FALSE`
     );
-    res.json(rows);
+    const result = rows.map(user => ({
+      id: user.id.toString(),
+      name: `${user.first_name} ${user.last_name}`,
+      role:
+        user.role_id === 1
+          ? "Admin"
+          : user.role_id === 4
+          ? "Delivery"
+          : "Customer",
+      avatar:
+        user.role_id === 1
+          ? "/avatars/admin.png"
+          : user.role_id === 4
+          ? "/avatars/delivery.png"
+          : "/avatars/customer.png",
+      is_suspended: user.is_suspended
+    }));
+    res.json(result);
   } catch (err) {
     console.error("Error fetching users:", err);
     res.status(500).json({ message: "Error fetching users" });
@@ -172,7 +202,10 @@ export const getAllUsers = async (_req: Request, res: Response): Promise<void> =
 // -----------------------
 // Update User Role
 // -----------------------
-export const updateUserRole = async (req: Request, res: Response): Promise<void> => {
+export const updateUserRole = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const userId = Number(req.params.id);
   const { role_id } = req.body;
   try {
@@ -196,7 +229,10 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
 // -----------------------
 // Soft-delete User
 // -----------------------
-export const deleteUser = async (req: Request, res: Response): Promise<void> => {
+export const deleteUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const userId = Number(req.params.id);
   try {
     const { rows } = await pool.query(
@@ -222,7 +258,10 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 // -----------------------
 // Suspend User (Admin action)
 // -----------------------
-export const suspendUser = async (req: Request, res: Response): Promise<void> => {
+export const suspendUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const userId = Number(req.params.id);
   try {
     const { rowCount } = await pool.query(
@@ -242,7 +281,10 @@ export const suspendUser = async (req: Request, res: Response): Promise<void> =>
 // -----------------------
 // Unsuspend User (Admin action)
 // -----------------------
-export const unsuspendUser = async (req: Request, res: Response): Promise<void> => {
+export const unsuspendUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const userId = Number(req.params.id);
   try {
     const { rowCount } = await pool.query(
@@ -262,7 +304,10 @@ export const unsuspendUser = async (req: Request, res: Response): Promise<void> 
 // -----------------------
 // Get Current User Profile
 // -----------------------
-export const getProfile = async (req: Request, res: Response): Promise<void> => {
+export const getProfile = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   // Assuming JWT payload is decoded in a middleware and attached to req.user
   const userId = (req as any).token.userId;
   try {
@@ -279,3 +324,39 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ message: "Error fetching profile" });
   }
 };
+export const getUserById = async (req: Request, res: Response): Promise<void> => {
+  const userId = Number(req.params.id);
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, first_name, last_name, role_id, is_suspended
+         FROM users
+        WHERE id = $1 AND is_deleted = FALSE`,
+      [userId]
+    );
+    if (!rows.length) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const user = rows[0];
+
+    let role: "Customer" | "Delivery" | "Admin" = "Customer";
+    if (user.role_id === 4) role = "Delivery";
+    if (user.role_id === 1) role = "Admin";
+
+    let avatar = "/avatars/customer.png";
+    if (role === "Delivery") avatar = "/avatars/delivery.png";
+    if (role === "Admin") avatar = "/avatars/admin.png";
+
+    res.json({
+      id: user.id.toString(),
+      name: `${user.first_name} ${user.last_name}`,
+      role,
+      avatar,
+      online: true, 
+    });
+  } catch (err) {
+    console.error("Error fetching user by id:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
