@@ -115,6 +115,8 @@ const ShoppingCart: React.FC = () => {
     if (!userId || !token) return;
     axios.get(`/location?userId=${userId}`).then((res) => {
       const locations = res.data.result;
+      console.log(locations);
+      
       if (locations.length > 0) setUserLocation(locations[0]);
     });
   }, [userId, token]);

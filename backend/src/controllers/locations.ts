@@ -40,15 +40,19 @@ const addLocation = (req: Request, res: Response): void => {
 
 // Get all locations
 const getLocations = (req: Request, res: Response): void => {
+  const { userId } = req.query;
+  console.log(userId);
+
   const query = `
-    SELECT
-      location_id,
-      location_name,
-      "UserId",
-      ST_Y(location::geometry) AS latitude,
-      ST_X(location::geometry) AS longitude
-    FROM locations
-    ORDER BY location_id DESC
+SELECT
+  location_id,
+  location_name,
+  "UserId",
+  ST_Y(location::geometry) AS latitude,
+  ST_X(location::geometry) AS longitude
+FROM locations
+WHERE "UserId" = ${userId}
+ORDER BY location_id DESC;
   `;
 
   pool
