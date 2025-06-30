@@ -85,7 +85,7 @@ export default function ProductCard({
             color="success.main"
             sx={{ mt: 1, fontWeight: 700 }}
           >
-            {price != null ? `$${price.toFixed(2)}` : "Price unavailable"}
+            {price != null ? `${price.toFixed(2)} JOD` : "Price unavailable"}
           </Typography>
         </CardContent>
       </CardActionArea>

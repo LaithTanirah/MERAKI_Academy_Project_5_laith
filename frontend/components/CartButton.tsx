@@ -69,7 +69,7 @@ export default function CartButton() {
 
   console.log(cartItems);
 
-  const itemCount = cartItems.length;
+  const itemCount = cartItems.length || 0;
   console.log(itemCount);
   
   return (

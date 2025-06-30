@@ -64,6 +64,9 @@ export default function RootLayout({
         rel="stylesheet"
       />
 
+      <head>
+        <title>Avocado</title>
+      </head>
       <body
         style={{
           minHeight: "100vh",
