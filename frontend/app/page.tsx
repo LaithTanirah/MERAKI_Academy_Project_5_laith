@@ -13,23 +13,22 @@ import {
   DialogContent,
   DialogActions,
   Link,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useSearchParams, useRouter } from "next/navigation";
 
 export default function AuthSplitLayout() {
-  // toggle between Login and Register screens
   const [showRegister, setShowRegister] = useState(false);
-
-  // modal state for success/error messages
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
-
-  // form state
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
     first_name: "",
@@ -38,23 +37,32 @@ export default function AuthSplitLayout() {
     password: "",
     phone_number: "",
   });
-
-  // suspension modals
   const [suspended, setSuspended] = useState(false);
   const [showSuspensionModal, setShowSuspensionModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState("");
+  const [forgotError, setForgotError] = useState("");
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-  // helper to open modal
+  // دالة تغلق كل النوافذ المفتوحة
+  const closeAllModals = () => {
+    setModalOpen(false);
+    setShowSuspensionModal(false);
+    setForgotPasswordModalOpen(false);
+  };
+
   const showModal = (title: string, message: string) => {
     setModalTitle(title);
     setModalMessage(message);
     setModalOpen(true);
   };
 
-  // handle Google OAuth return
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) {
@@ -65,47 +73,47 @@ export default function AuthSplitLayout() {
         })
         .then((res) => {
           localStorage.setItem("user", JSON.stringify(res.data));
+          closeAllModals();
           showModal("Success", "Logged in with Google successfully!");
           router.push("/home");
         })
         .catch(() => {
+          closeAllModals();
           showModal("Error", "Could not fetch user data");
         });
     }
   }, [searchParams, API, router]);
 
-  // update login form
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setLoginForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // update register form
   const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setRegisterForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // submit login and redirect based on role
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!loginForm.email || !loginForm.password) {
+      closeAllModals();
+      showModal("Error", "Please provide email and password.");
+      return;
+    }
+
     try {
       const { data } = await axios.post(`${API}/api/auth/login`, loginForm);
-
-      // store token and user data
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-
       const roleId = data.user?.role_id;
-
       if (roleId === 1) {
-        // admin user
         router.push("/admin");
       } else if (roleId === 4) {
-        // delivery user
         router.push("/delivery");
       } else {
-        // regular user
+        closeAllModals();
         showModal("Success", "Login successful!");
       }
     } catch (err: any) {
@@ -114,31 +122,70 @@ export default function AuthSplitLayout() {
         (err.response.data.message?.toLowerCase().includes("suspend") ||
           err.response.data.error?.toLowerCase().includes("suspend"))
       ) {
-        // account suspended
+        closeAllModals();
         setSuspended(true);
         setShowSuspensionModal(true);
         return;
       }
-      // generic error
+      closeAllModals();
       showModal("Error", err.response?.data?.error || "Login failed");
     }
   };
 
-  // submit registration
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await axios.post(`${API}/api/auth/register`, registerForm);
+      closeAllModals();
       showModal("Success", "Registration successful!");
       setShowRegister(false);
     } catch (err: any) {
+      closeAllModals();
       showModal("Error", err.response?.data?.error || "Registration failed");
     }
   };
 
-  // redirect to Google OAuth
   const handleGoogleLogin = () => {
     window.location.href = `${API}/api/auth/google`;
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const openForgotPasswordModal = () => {
+    closeAllModals();
+    setForgotPasswordModalOpen(true);
+    setForgotEmail("");
+    setForgotSuccess("");
+    setForgotError("");
+  };
+
+  const closeForgotPasswordModal = () => {
+    setForgotPasswordModalOpen(false);
+  };
+
+  const handleForgotEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForgotEmail(e.target.value);
+  };
+
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    setForgotSuccess("");
+    setForgotError("");
+    try {
+      await axios.post(`${API}/api/auth/forgot-password`, {
+        email: forgotEmail,
+      });
+      setForgotSuccess("Password reset link sent to your email.");
+      setForgotLoading(false);
+    } catch (error: any) {
+      setForgotError(
+        error.response?.data?.error || "Failed to send reset link."
+      );
+      setForgotLoading(false);
+    }
   };
 
   return (
@@ -165,7 +212,6 @@ export default function AuthSplitLayout() {
         }}
       >
         <Grid container>
-          {/* left side: login or welcome back */}
           <Grid
             item
             xs={12}
@@ -188,10 +234,10 @@ export default function AuthSplitLayout() {
                   exit={{ opacity: 0, x: 100 }}
                   transition={{ duration: 0.5 }}
                 >
-                   <img
+                  <img
                     src="logos/logo1.png"
                     alt="Logo"
-                    style={{ width: 250, marginBottom: 50,marginLeft:50 }}
+                    style={{ width: 250, marginBottom: 50, marginLeft: 50 }}
                   />
                   <Typography variant="h3" fontWeight="bold" gutterBottom>
                     Welcome Back!
@@ -246,20 +292,56 @@ export default function AuthSplitLayout() {
                     <TextField
                       label="Password"
                       name="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       fullWidth
                       margin="normal"
                       variant="filled"
                       value={loginForm.password}
                       onChange={handleLoginChange}
                       sx={{ bgcolor: "#eee", borderRadius: 1 }}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={toggleShowPassword}
+                              edge="end"
+                              aria-label="toggle password visibility"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        mt: 0.5,
+                        mb: 2,
+                      }}
+                    >
+                     <Link
+  component="button"
+  type="button"
+  variant="body2"
+  onClick={openForgotPasswordModal}
+  sx={{ cursor: "pointer", userSelect: "none" }}
+>
+  Forgot password?
+</Link>
+
+                    </Box>
                     <Button
                       type="submit"
                       variant="contained"
                       fullWidth
                       sx={{
-                        mt: 4,
+                        mt: 1,
                         py: 1.5,
                         backgroundColor: "#4caf50",
                         "&:hover": { backgroundColor: "#45a049" },
@@ -291,13 +373,35 @@ export default function AuthSplitLayout() {
                       />
                       LOGIN WITH GOOGLE
                     </Button>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      disabled
+                      sx={{
+                        mt: 2,
+                        py: 1.5,
+                        color: "#000",
+                        borderColor: "#000",
+                        backgroundColor: "#f5f5f5",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                        opacity: 0.6,
+                      }}
+                    >
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
+                        alt="Apple"
+                        style={{ width: 20, height: 20 }}
+                      />
+                      SIGN IN WITH APPLE (SOON)
+                    </Button>
                   </Box>
                 </motion.div>
               )}
             </AnimatePresence>
           </Grid>
-
-          {/* right side: register or invitation */}
           <Grid
             item
             xs={12}
@@ -436,7 +540,6 @@ export default function AuthSplitLayout() {
         </Grid>
       </Paper>
 
-      {/* success/error modal */}
       <Dialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -489,7 +592,6 @@ export default function AuthSplitLayout() {
         </DialogActions>
       </Dialog>
 
-      {/* suspension modal */}
       <Dialog open={showSuspensionModal} disableEscapeKeyDown>
         <DialogTitle sx={{ textAlign: "center", color: "error.main" }}>
           Account Suspended
@@ -512,6 +614,58 @@ export default function AuthSplitLayout() {
         <DialogActions sx={{ justifyContent: "center" }}>
           <Button variant="contained" onClick={() => window.location.reload()}>
             OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={forgotPasswordModalOpen}
+        onClose={closeForgotPasswordModal}
+        PaperProps={{
+          sx: { borderRadius: 3, p: 3, minWidth: 300, textAlign: "center" },
+        }}
+      >
+        <DialogTitle>Reset Password</DialogTitle>
+        <DialogContent>
+          {forgotSuccess ? (
+            <Typography sx={{ color: "green", mb: 2 }}>
+              {forgotSuccess}
+            </Typography>
+          ) : (
+            <>
+              <Typography sx={{ mb: 2 }}>
+                Enter your email to receive a reset link.
+              </Typography>
+              <TextField
+                label="Email"
+                type="email"
+                fullWidth
+                variant="filled"
+                value={forgotEmail}
+                onChange={handleForgotEmailChange}
+                sx={{ mb: 2 }}
+              />
+              {forgotError && (
+                <Typography sx={{ color: "red", mb: 2 }}>
+                  {forgotError}
+                </Typography>
+              )}
+            </>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center" }}>
+          {!forgotSuccess && (
+            <Button
+              onClick={handleForgotPasswordSubmit}
+              disabled={forgotLoading}
+              variant="contained"
+              sx={{ py: 1, px: 4 }}
+            >
+              {forgotLoading ? "Sending..." : "Send"}
+            </Button>
+          )}
+          <Button onClick={closeForgotPasswordModal} sx={{ py: 1, px: 4 }}>
+            Close
           </Button>
         </DialogActions>
       </Dialog>

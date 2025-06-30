@@ -1,14 +1,19 @@
 "use client";
 
-import { Box, Typography, Button, Container } from "@mui/material";
+import { Box, Typography, Button, Container, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
 export default function ShopHero() {
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
-        background: "linear-gradient(180deg, #2e7d32 0%,rgb(248, 252, 247) 100%)", // dark green gradient
+        background:
+          theme.palette.mode === "dark"
+            ? "linear-gradient(180deg, #121212 0%, #1e1e1e 100%)"
+            : "linear-gradient(180deg, #2e7d32 0%, rgb(248, 252, 247) 100%)",
         py: { xs: 10, md: 14 },
       }}
     >
@@ -23,7 +28,6 @@ export default function ShopHero() {
           px: { xs: 2, sm: 6 },
         }}
       >
-        {/* Circular video with shadow */}
         <motion.div
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -35,8 +39,14 @@ export default function ShopHero() {
               height: { xs: 260, sm: 320, md: 400 },
               borderRadius: "50%",
               overflow: "hidden",
-              border: "8px solid #66bb6a",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.35)",
+              border:
+                theme.palette.mode === "dark"
+                  ? "8px solid #66bb6a"
+                  : "8px solid #66bb6a",
+              boxShadow:
+                theme.palette.mode === "dark"
+                  ? "0 20px 50px rgba(0,0,0,0.9)"
+                  : "0 20px 50px rgba(0,0,0,0.35)",
               mx: "auto",
               flexShrink: 0,
             }}
@@ -54,7 +64,6 @@ export default function ShopHero() {
           </Box>
         </motion.div>
 
-        {/* Welcome text section */}
         <motion.div
           initial={{ opacity: 0, x: 60 }}
           animate={{ opacity: 1, x: 0 }}
@@ -64,13 +73,16 @@ export default function ShopHero() {
           <Typography
             variant="h2"
             fontWeight={900}
-            color="#ffffff"
+            color={theme.palette.mode === "dark" ? "#e0f2f1" : "#ffffff"}
             gutterBottom
             sx={{
               textAlign: { xs: "center", md: "left" },
               fontSize: { xs: "2rem", md: "2.75rem" },
               lineHeight: 1.2,
-              textShadow: "1px 1px 6px rgba(0,0,0,0.4)",
+              textShadow:
+                theme.palette.mode === "dark"
+                  ? "1px 1px 6px rgba(0,0,0,0.8)"
+                  : "1px 1px 6px rgba(0,0,0,0.4)",
             }}
           >
             Discover Fresh & Organic Avocado Products
@@ -78,12 +90,15 @@ export default function ShopHero() {
 
           <Typography
             variant="body1"
-            color="#f1f8e9"
+            color={theme.palette.mode === "dark" ? "#a5d6a7" : "#f1f8e9"}
             sx={{
               mb: 3,
               textAlign: { xs: "center", md: "left" },
               lineHeight: 1.8,
-              textShadow: "0 0 4px rgba(0,0,0,0.3)",
+              textShadow:
+                theme.palette.mode === "dark"
+                  ? "0 0 4px rgba(255,255,255,0.2)"
+                  : "0 0 4px rgba(0,0,0,0.3)",
               fontSize: { xs: "0.95rem", md: "1.1rem" },
             }}
           >
@@ -103,7 +118,10 @@ export default function ShopHero() {
                   fontWeight: 700,
                   textTransform: "capitalize",
                   borderRadius: "30px",
-                  boxShadow: "0 4px 12px rgba(76,175,80,0.3)",
+                  boxShadow:
+                    theme.palette.mode === "dark"
+                      ? "0 4px 12px rgba(165, 214, 167, 0.7)"
+                      : "0 4px 12px rgba(76,175,80,0.3)",
                 }}
               >
                 Shop Now

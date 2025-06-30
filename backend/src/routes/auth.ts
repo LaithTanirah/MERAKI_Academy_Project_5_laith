@@ -13,6 +13,8 @@ import {
   getUserById,
   updateProfile,
   changePassword,
+  forgotPassword,
+  resetPassword
 } from "../controllers/auth";
 import authenticateJWT from "../middleware/authentication";
 
@@ -56,5 +58,11 @@ router.get("/users/:id", authenticateJWT, getUserById);
 router.put("/profile", authenticateJWT, updateProfile);
 //change password
 router.put("/change-password", authenticateJWT, changePassword);
+
+//forget password
+router.post("/forgot-password", forgotPassword);
+
+//rest-password
+router.post("/reset-password", resetPassword);
 
 export default router;

@@ -4,7 +4,8 @@ import bcrypt from "bcryptjs";
 import JWT from "jsonwebtoken";
 import dotenv from "dotenv";
 import passport from "passport";
-
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -460,7 +461,6 @@ export const changePassword = async (
       return;
     }
 
-  
     const { rows } = await pool.query(
       `SELECT password FROM users WHERE id = $1`,
       [userId]
@@ -479,18 +479,103 @@ export const changePassword = async (
       return;
     }
 
-   
     const salt = bcrypt.genSaltSync(10);
     const hashedNew = bcrypt.hashSync(newPassword, salt);
 
-    await pool.query(
-      `UPDATE users SET password = $1 WHERE id = $2`,
-      [hashedNew, userId]
-    );
+    await pool.query(`UPDATE users SET password = $1 WHERE id = $2`, [
+      hashedNew,
+      userId,
+    ]);
 
     res.json({ message: "Password updated successfully." });
   } catch (err) {
     console.error("Change password error:", err);
     res.status(500).json({ error: "Something went wrong." });
+  }
+};
+
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "Email is required" });
+
+  try {
+    const { rows } = await pool.query(`SELECT id FROM users WHERE email = $1`, [
+      email,
+    ]);
+    if (!rows.length) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userId = rows[0].id;
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = Date.now() + 3600000;
+
+    await pool.query(
+      `UPDATE users SET reset_token = $1, reset_token_expiry = $2 WHERE id = $3`, 
+      [resetToken, resetTokenExpiry, userId]
+    );
+
+    const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Avocado Support" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Password Reset Request",
+      html: `<p>You requested a password reset. Click <a href="${resetUrl}">here</a> to reset your password.</p>`,
+    });
+
+    res.json({ message: "Password reset link sent." });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ error: "Failed to send reset link." });
+  }
+};
+
+// -----------------------
+// Reset Password (إعادة تعيين كلمة المرور)
+// -----------------------
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  const { token, password } = req.body;
+  if (!token || !password)
+    return res.status(400).json({ error: "Token and new password are required." });
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, reset_token_expiry FROM users WHERE reset_token = $1`,
+      [token]
+    );
+    if (!rows.length) {
+      return res.status(400).json({ error: "Invalid or expired token." });
+    }
+    const user = rows[0];
+
+    if (Date.now() > user.reset_token_expiry) {
+      return res.status(400).json({ error: "Reset token has expired." });
+    }
+
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    await pool.query(
+      `UPDATE users SET password = $1, reset_token = NULL, reset_token_expiry = NULL WHERE id = $2`,
+      [hashedPassword, user.id]
+    );
+
+    res.json({ message: "Password has been reset successfully." });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ error: "Failed to reset password." });
   }
 };

@@ -21,13 +21,16 @@ import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
+import PersonIcon from "@mui/icons-material/Person";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 import Link from "next/link";
 import SearchBar from "./SeachBar";
 import CartButton from "./CartButton";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useThemeMode } from "./ThemeContext";
 
-// شعار أفوكادو SVG مُحسّن
 function AvocadoIcon({ size = 34, style = {} }) {
   return (
     <Box
@@ -56,6 +59,7 @@ export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
   const router = useRouter();
+  const { darkMode, toggleDarkMode } = useThemeMode();
 
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
@@ -75,8 +79,12 @@ export default function Navbar() {
         position="sticky"
         elevation={0}
         sx={{
-          background: "linear-gradient(90deg, #388e3c 0%, #2e7d32 100%)",
-          boxShadow: "0 6px 24px rgba(34, 139, 34, 0.2)",
+          background: darkMode
+            ? "linear-gradient(90deg, #181818 0%, #222 100%)"
+            : "linear-gradient(90deg, #388e3c 0%, #2e7d32 100%)",
+          boxShadow: darkMode
+            ? "0 6px 24px rgba(0,0,0,0.7)"
+            : "0 6px 24px rgba(34, 139, 34, 0.2)",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
           backdropFilter: "blur(10px)",
           zIndex: 1000,
@@ -89,7 +97,6 @@ export default function Navbar() {
             px: { xs: 1, md: 4 },
           }}
         >
-          {/* START LEFT SIDE */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <motion.div whileTap={{ scale: 0.9 }}>
               <IconButton
@@ -107,7 +114,11 @@ export default function Navbar() {
             </motion.div>
 
             <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
-              <img src="logos/logo6.png" alt="Logo" style={{ width: 60,marginTop:7 }} />
+              <img
+                src="logos/logo6.png"
+                alt="Logo"
+                style={{ width: 60, marginTop: 7 }}
+              />
               <Typography
                 variant="h5"
                 component={Link}
@@ -126,9 +137,7 @@ export default function Navbar() {
               </Typography>
             </Box>
           </Box>
-          {/* END LEFT SIDE */}
 
-          {/* START SEARCHBAR */}
           <Box
             sx={{ flex: 1, maxWidth: 500, mx: 2 }}
             component={motion.div}
@@ -138,10 +147,29 @@ export default function Navbar() {
           >
             <SearchBar />
           </Box>
-          {/* END SEARCHBAR */}
 
-          {/* START ACTION BUTTONS */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <motion.div whileHover={{ rotate: 20 }} whileTap={{ scale: 0.8 }}>
+              <IconButton
+                onClick={toggleDarkMode}
+                sx={{
+                  bgcolor: iconBg,
+                  borderRadius: 2,
+                  mr: 1,
+                  boxShadow: "0 1px 8px rgba(0,0,0,0.12)",
+                  "&:hover": { bgcolor: iconHoverBg },
+                  transition: "all 0.2s",
+                }}
+                aria-label="toggle theme"
+              >
+                {darkMode ? (
+                  <Brightness7Icon sx={{ color: "#ffe066", fontSize: 28 }} />
+                ) : (
+                  <Brightness4Icon sx={{ color: "#333", fontSize: 28 }} />
+                )}
+              </IconButton>
+            </motion.div>
+
             {[
               ["/FavoriteProducts", <FavoriteBorderIcon key="fav" />],
               ["/cart", <CartButton key="cart" />],
@@ -165,7 +193,6 @@ export default function Navbar() {
               </motion.div>
             ))}
 
-            {/* LOGOUT BUTTON */}
             <motion.div whileHover={{ rotate: 15 }} whileTap={{ rotate: 0 }}>
               <IconButton
                 color="inherit"
@@ -180,22 +207,24 @@ export default function Navbar() {
               </IconButton>
             </motion.div>
           </Box>
-          {/* END ACTION BUTTONS */}
         </Toolbar>
       </AppBar>
 
-      {/* DRAWER MENU */}
       <Drawer
         anchor="left"
         open={drawerOpen}
         onClose={toggleDrawer(false)}
         PaperProps={{
           sx: {
-            background: "linear-gradient(135deg, #2e7d32 20%, #388e3c 100%)",
+            background: darkMode
+              ? "#181818"
+              : "linear-gradient(135deg, #2e7d32 20%, #388e3c 100%)",
             color: "#fff",
             borderTopRightRadius: 28,
             borderBottomRightRadius: 14,
-            boxShadow: "0 6px 28px rgba(34, 139, 34, 0.2)",
+            boxShadow: darkMode
+              ? "0 6px 28px rgba(0,0,0,0.7)"
+              : "0 6px 28px rgba(34, 139, 34, 0.2)",
             border: "none",
           },
         }}
@@ -235,6 +264,7 @@ export default function Navbar() {
             <List>
               {[
                 { text: "Home", icon: <HomeIcon />, link: "/home" },
+                { text: "Profile", icon: <PersonIcon />, link: "/profile" },
                 {
                   text: "Favorites",
                   icon: <FavoriteBorderIcon />,
