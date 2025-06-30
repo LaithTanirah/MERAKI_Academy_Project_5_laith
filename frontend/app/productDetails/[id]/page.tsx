@@ -86,7 +86,7 @@ const ProductDetailsPage: React.FC = () => {
     setLoading(true);
     axios
       .get<{ cart?: { id: number }[] }>(
-        `http://localhost:5000/api/cart/getAllCartByIsDeletedFalse/${userId}`,
+        `https://avocado-z31n.onrender.com/api/cart/getAllCartByIsDeletedFalse/${userId}`,
         { headers: { authorization: `Bearer ${token}` } }
       )
       .then((res) => {
@@ -107,7 +107,7 @@ const ProductDetailsPage: React.FC = () => {
     setError(null);
 
     axios
-      .get<ProductDetailsProps>(`http://localhost:5000/api/products/${id}`)
+      .get<ProductDetailsProps>(`https://avocado-z31n.onrender.com/api/products/${id}`)
       .then((response) => {
         setProduct(response.data);
         if (response.data.size.length > 0) {
@@ -160,7 +160,7 @@ const ProductDetailsPage: React.FC = () => {
       const productId = product?.id;
 
       const response = await axios.post(
-        "http://localhost:5000/api/cartProduct",
+        "https://avocado-z31n.onrender.com/api/cartProduct",
         {
           cartId,
           productId,
@@ -193,7 +193,7 @@ const ProductDetailsPage: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/favorite",
+        "https://avocado-z31n.onrender.com/api/favorite",
         {
           productId: product?.id,
           userId: userId,

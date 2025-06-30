@@ -28,7 +28,7 @@ import { format } from "date-fns";
 import DeliveryReview from "@/components/DeliveryReview";
 
 // Axios base URL
-axios.defaults.baseURL = "http://localhost:5000/api";
+axios.defaults.baseURL = "https://avocado-z31n.onrender.com/api";
 
 // Types
 interface TokenPayload {
