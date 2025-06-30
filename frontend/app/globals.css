@@ -43,3 +43,53 @@ html {
 body {
   overflow-x: hidden;
 }
+
+/* ====================== */
+/*        DARK MODE       */
+/* ====================== */
+
+body.dark {
+  background: #181818 !important;
+  color: #fff !important;
+}
+
+body.dark .MuiPaper-root,
+body.dark .MuiBox-root,
+body.dark .MuiContainer-root,
+body.dark .MuiAppBar-root,
+body.dark .MuiDrawer-paper {
+  background-color: #181818 !important;
+  color: #fff !important;
+}
+
+body.dark a {
+  color: #bbffbb !important;
+}
+
+body.dark .slick-dots li button:before {
+  color: #bbffbb !important;
+}
+
+body.dark input,
+body.dark textarea,
+body.dark .MuiInputBase-root {
+  background: #222 !important;
+  color: #fff !important;
+  border-color: #444 !important;
+}
+
+body.dark ::placeholder {
+  color: #bbb !important;
+}
+
+body.dark .MuiButton-root {
+  background-color: #388e3c !important;
+  color: #fff !important;
+}
+
+body.dark .MuiButton-outlined {
+  background: transparent !important;
+  color: #bbffbb !important;
+  border-color: #bbffbb !important;
+}
+

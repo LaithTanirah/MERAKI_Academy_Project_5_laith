@@ -2,8 +2,22 @@
 
 import { useEffect, useState, useRef } from "react";
 import {
-  Box, IconButton, Paper, TextField, Button, Typography, useTheme, Badge, List,
-  ListItem, Chip, Avatar, Divider, Dialog, DialogTitle, DialogActions
+  Box,
+  IconButton,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  useTheme,
+  Badge,
+  List,
+  ListItem,
+  Chip,
+  Avatar,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import io from "socket.io-client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -44,9 +58,10 @@ export default function AdvancedChatWidget() {
   const [userId, setUserId] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const suggestions = language === "ar"
-    ? ["وين طلبي؟", "بدي أرجّع منتج", "في مشكلة بالخصم"]
-    : ["Where is my order?", "I want to return a product", "There is a problem with the discount"];
+  const suggestions =
+    language === "ar"
+      ? ["وين طلبي؟", "بدي أرجّع منتج", "في مشكلة بالخصم"]
+      : ["Where is my order?", "I want to return a product", "There is a problem with the discount"];
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -61,34 +76,26 @@ export default function AdvancedChatWidget() {
 
   useEffect(() => {
     if (!userId || isAdmin || !language) return;
-
     const socket = io("http://localhost:5000");
     socketRef.current = socket;
-
-    // fetch user data from your backend
     fetch(`/api/users/${userId}`)
       .then((res) => res.json())
       .then((data) => setUserData(data))
       .catch(console.error);
-
     socket.emit("join-room", { roomId: userId, isAdmin: false });
-
     const welcomeMsg =
       language === "ar"
         ? "أهلًا بك في أفوكادو! 👋 كيف يمكننا مساعدتك اليوم؟"
         : "Welcome to Avocado! 👋 How can we help you today?";
     setChat((prev) => [...prev, { sender: "admin", message: welcomeMsg, roomId: userId }]);
-
     socket.on("receive-message", (msg: ChatMessage) => {
       setChat((prev) => {
         if (prev.length && prev[prev.length - 1].message === msg.message) return prev;
         return [...prev, msg];
       });
       setUnread((prev) => prev + 1);
-
       const lower = msg.message.toLowerCase();
       let autoReply = "";
-
       if (language === "en") {
         if (lower.includes("order")) autoReply = "Let me check that for you... Can you provide your order number?";
         else if (lower.includes("return")) autoReply = "Sorry to hear that! Please tell us the product you want to return.";
@@ -104,20 +111,14 @@ export default function AdvancedChatWidget() {
         else if (lower.includes("مرحبا") || lower.includes("اهلا")) autoReply = "مرحبًا بك! كيف يمكننا مساعدتك اليوم؟";
         else if (lower.includes("شكرا")) autoReply = "العفو! 😊 هل يوجد شيء آخر يمكننا مساعدتك به؟";
       }
-
       if (autoReply) {
         setTimeout(() => {
-          setChat((prev) => [
-            ...prev,
-            { sender: "admin", message: autoReply, roomId: userId },
-          ]);
+          setChat((prev) => [...prev, { sender: "admin", message: autoReply, roomId: userId }]);
         }, 1000);
       }
     });
-
     socket.on("typing", () => setTyping(true));
     socket.on("stop-typing", () => setTyping(false));
-
     return () => socket.disconnect();
   }, [userId, isAdmin, language]);
 
@@ -128,11 +129,7 @@ export default function AdvancedChatWidget() {
   const sendMessage = () => {
     const trimmed = message.trim();
     if (!trimmed || !socketRef.current) return;
-    const newMsg: ChatMessage = {
-      sender: "user",
-      message: trimmed,
-      roomId: userId,
-    };
+    const newMsg: ChatMessage = { sender: "user", message: trimmed, roomId: userId };
     socketRef.current.emit("send-message", newMsg);
     setChat((prev) => [...prev, newMsg]);
     setMessage("");
@@ -169,7 +166,6 @@ export default function AdvancedChatWidget() {
           </Button>
         </DialogActions>
       </Dialog>
-
       <Badge color="error" badgeContent={unread} invisible={unread === 0}>
         <IconButton
           onClick={() => {
@@ -180,19 +176,32 @@ export default function AdvancedChatWidget() {
               setOpen(true);
             }
           }}
-          sx={{ position: "fixed", bottom: 20, right: 20, zIndex: 1300 }}
+          sx={{
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            zIndex: 1300,
+            bgcolor: "#4caf50",
+            color: "#fff",
+            width: 60,
+            height: 60,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+            "&:hover": { bgcolor: "#43a047" },
+          }}
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            whileHover={{ scale: 1.2 }}
+            whileHover={{ scale: 1.1 }}
             transition={{ repeat: Infinity, repeatDelay: 10 }}
+            style={{
+              fontSize: "26px",
+            }}
           >
             💬
           </motion.div>
         </IconButton>
       </Badge>
-
       <AnimatePresence>
         {open && (
           <motion.div
@@ -228,9 +237,7 @@ export default function AdvancedChatWidget() {
                   ✖
                 </Button>
               </Box>
-
               <Divider sx={{ my: 1 }} />
-
               <Box sx={{ flex: 1, overflowY: "auto", mb: 1 }}>
                 {chat.map((msg, idx) => (
                   <motion.div
@@ -255,7 +262,7 @@ export default function AdvancedChatWidget() {
                         }}
                       >
                         <Avatar sx={{ bgcolor: msg.sender === "admin" ? "#3949ab" : "#66bb6a" }}>
-                          {msg.sender === "admin" ? "A" : (userData?.name?.charAt(0) ?? "U")}
+                          {msg.sender === "admin" ? "A" : userData?.name?.charAt(0) ?? "U"}
                         </Avatar>
                         <Box
                           sx={{
@@ -275,13 +282,11 @@ export default function AdvancedChatWidget() {
                 ))}
                 <div ref={bottomRef} />
               </Box>
-
               {typing && (
                 <Typography variant="caption" sx={{ mt: 0.5 }}>
                   {language === "ar" ? "المشرف يكتب..." : "Admin is typing..."}
                 </Typography>
               )}
-
               <List sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
                 {suggestions.map((s, i) => (
                   <ListItem key={i} sx={{ p: 0 }}>
@@ -289,7 +294,6 @@ export default function AdvancedChatWidget() {
                   </ListItem>
                 ))}
               </List>
-
               <TextField
                 fullWidth
                 size="small"

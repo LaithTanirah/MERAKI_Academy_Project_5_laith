@@ -20,6 +20,7 @@ import axios from "axios";
 import { Product } from "../../types/product";
 import ShopHero from "@/components/ShopHero";
 import PromotionalBanner from "@/components/PromotionalBanner";
+import { useThemeMode } from "../../components/ThemeContext"; 
 
 interface TokenPayload {
   userId: string;
@@ -31,6 +32,7 @@ export default function HomePage() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [products, setProducts] = useState<Product[]>([]);
   const router = useRouter();
+  const { darkMode } = useThemeMode(); // جديد
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -62,22 +64,36 @@ export default function HomePage() {
     autoplaySpeed: 2000,
     arrows: false,
   };
-  console.log(products);
 
   return (
-    <main style={{ backgroundColor: "#f1fef4", minHeight: "100vh" }}>
+    <main
+      style={{
+        backgroundColor: darkMode ? "#181818" : "#f1fef4",
+        minHeight: "100vh",
+      }}
+    >
       <ShopHero />
 
       <PromotionalBanner />
 
-      <Box component="section" sx={{ py: 8, bgcolor: "#f4fff8" }}>
+      <Box
+        component="section"
+        sx={{ py: 8, bgcolor: darkMode ? "#222" : "#f4fff8" }}
+      >
         <Container maxWidth="lg">
           <Categories />
         </Container>
       </Box>
 
       {/* Slider Section */}
-      <Box sx={{ py: 4, px: 0, mt: 0, backgroundColor: "-moz-initia" }}>
+      <Box
+        sx={{
+          py: 4,
+          px: 0,
+          mt: 0,
+          backgroundColor: darkMode ? "#111" : "#fff",
+        }}
+      >
         <Container maxWidth="lg" sx={{ px: { xs: 1, md: 0 } }}>
           <Box
             sx={{
@@ -209,7 +225,7 @@ export default function HomePage() {
           m: 0,
           p: 0,
           overflow: "hidden",
-          backgroundColor: "-moz-initial",
+          backgroundColor: darkMode ? "#111" : "-moz-initial",
         }}
       >
         <WhyChoose />

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Box, Typography, Grid, Avatar, useTheme, Button } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
@@ -10,6 +11,7 @@ import StarOutlineIcon from '@mui/icons-material/StarOutline';
 
 export default function WhyChoose() {
   const theme = useTheme();
+  const router = useRouter();
 
   const stats = [
     { label: 'Success Stories', value: '215+', color: '#2e7d32' },
@@ -24,6 +26,10 @@ export default function WhyChoose() {
     { icon: <CreditCardOutlinedIcon />, title: 'Secure Payments', desc: 'SSL encryption & fraud protection.' },
     { icon: <StarOutlineIcon />, title: 'Organic Quality', desc: 'Natural and organic products you can trust.' },
   ];
+
+  const handleLearnMore = () => {
+    router.push('/aboutUs'); 
+  };
 
   return (
     <Box
@@ -134,6 +140,7 @@ export default function WhyChoose() {
                 backgroundColor: '#ef6c00',
                 '&:hover': { backgroundColor: '#e65100' },
               }}
+              onClick={handleLearnMore}
             >
               Learn More
             </Button>
