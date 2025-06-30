@@ -32,7 +32,7 @@ const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
   ssr: false,
 });
 
-axios.defaults.baseURL = "http://localhost:5000/api";
+axios.defaults.baseURL = "https://avocado-z31n.onrender.com/api";
 
 interface TokenPayload {
   userId: number;

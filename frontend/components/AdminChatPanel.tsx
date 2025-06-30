@@ -13,7 +13,7 @@ import {
   Divider,
 } from "@mui/material";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://avocado-z31n.onrender.com");
 
 interface Message {
   sender: string;
