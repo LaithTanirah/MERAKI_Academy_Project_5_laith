@@ -218,7 +218,7 @@ export default function ProfilePage() {
                 <Avatar
                   src={
                     avatarPreview ||
-                    "https://i.pravatar.cc/150?img=14"
+                    "logos/logo4.png"
                   }
                   sx={{
                     width: 120,

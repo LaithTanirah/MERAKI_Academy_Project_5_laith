@@ -310,7 +310,7 @@ const ShoppingCart: React.FC = () => {
                     <Typography variant="h6">{prod.title}</Typography>
                     <Typography variant="body2">Size: {prod.size}</Typography>
                     <Typography variant="subtitle1" color="primary">
-                      ${prod.price.toFixed(2)}
+                      {prod.price.toFixed(2)} JOD
                     </Typography>
                   </CardContent>
                   <CardActions sx={{ flexDirection: "column" }}>
@@ -359,7 +359,7 @@ const ShoppingCart: React.FC = () => {
               )}
             </Typography>
             <Typography variant="h5" fontWeight="bold" mt={2} mb={3}>
-              Total: ${totalPrice.toFixed(2)}
+              Total: {totalPrice.toFixed(2)} JOD
             </Typography>
             {!userLocation && (
               <Button
