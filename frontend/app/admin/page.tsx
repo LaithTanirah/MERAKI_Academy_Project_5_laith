@@ -85,7 +85,7 @@ export default function AdminDashboardPage() {
               boxShadow: "md",
             }}
           >
-            <Typography level="title-lg" mb={2} color="success.700">
+            <Typography level="title-lg" mb={2} color="success">
               Recent Activity
             </Typography>
             <Divider />

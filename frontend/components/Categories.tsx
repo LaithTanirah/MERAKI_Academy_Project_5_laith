@@ -24,7 +24,7 @@ export default function Categories() {
   const [cats, setcats] = useState<category[]>([]);
 
   useEffect(() => {
-    axios.get("https://avocado-z31n.onrender.com/api/categories").then((result) => {
+    axios.get("http://localhost:5000/api/categories").then((result) => {
       setcats(result.data);
     });
   }, []);

@@ -29,7 +29,7 @@ export default function SearchPage() {
 
     setLoading(true);
     axios
-      .get(`https://avocado-z31n.onrender.com/api/products/search?query=${encodeURIComponent(query)}`)
+      .get(`http://localhost:5000/api/products/search?query=${encodeURIComponent(query)}`)
       .then((res) => setResults(res.data || []))
       .catch((err) => console.error("Search error:", err))
       .finally(() => setLoading(false));

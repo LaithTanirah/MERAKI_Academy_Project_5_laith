@@ -76,7 +76,7 @@ export default function AdvancedChatWidget() {
 
   useEffect(() => {
     if (!userId || isAdmin || !language) return;
-    const socket = io("https://avocado-z31n.onrender.com");
+    const socket = io("http://localhost:5000");
     socketRef.current = socket;
     fetch(`/api/users/${userId}`)
       .then((res) => res.json())

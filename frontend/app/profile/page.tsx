@@ -93,7 +93,7 @@ export default function ProfilePage() {
       return;
     }
     axios
-      .get("https://avocado-z31n.onrender.com/api/auth/profile", {
+      .get("http://localhost:5000/api/auth/profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -130,7 +130,7 @@ export default function ProfilePage() {
       const token = localStorage.getItem("token");
 
       // Update profile info except avatar
-      await axios.put("https://avocado-z31n.onrender.com/api/auth/profile", form, {
+      await axios.put("http://localhost:5000/api/auth/profile", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -139,7 +139,7 @@ export default function ProfilePage() {
         const formData = new FormData();
         formData.append("avatar", avatarFile);
 
-        await axios.post("https://avocado-z31n.onrender.com/api/auth/upload-avatar", formData, {
+        await axios.post("http://localhost:5000/api/auth/upload-avatar", formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
@@ -161,7 +161,7 @@ export default function ProfilePage() {
       setPassMsg("");
       const token = localStorage.getItem("token");
       await axios.put(
-        "https://avocado-z31n.onrender.com/api/auth/change-password",
+        "http://localhost:5000/api/auth/change-password",
         { oldPassword: oldPass, newPassword: newPass },
         { headers: { Authorization: `Bearer ${token}` } }
       );

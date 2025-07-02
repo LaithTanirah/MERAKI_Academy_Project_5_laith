@@ -49,7 +49,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    axios.get("https://avocado-z31n.onrender.com/api/products").then((result) => {
+    axios.get("http://localhost:5000/api/products").then((result) => {
       setProducts(result.data);
     });
   }, []);

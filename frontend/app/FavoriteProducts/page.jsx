@@ -46,7 +46,7 @@ const FavoriteProducts = () => {
   useEffect(() => {
     if (!userId) return;
     axios
-      .get(`https://avocado-z31n.onrender.com/api/favorite/${userId}`, {
+      .get(`http://localhost:5000/api/favorite/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -65,7 +65,7 @@ const FavoriteProducts = () => {
 
     try {
       await axios.delete(
-        `https://avocado-z31n.onrender.com/api/favorite/delete/${productId}`,
+        `http://localhost:5000/api/favorite/delete/${productId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
