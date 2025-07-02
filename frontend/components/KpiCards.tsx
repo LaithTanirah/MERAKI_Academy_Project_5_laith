@@ -21,7 +21,7 @@ export default function KpiCards() {
   const [customers, setCustomers] = useState(0);
 
   useEffect(() => {
-    fetch("https://avocado-z31n.onrender.com/api/dashboard/summary")
+    fetch("http://localhost:5000/api/dashboard/summary")
       .then((res) => res.json())
       .then((data) => {
         setTotalProducts(data.totalProducts);

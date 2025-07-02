@@ -82,14 +82,17 @@ const ProductDetailsPage: React.FC = () => {
 
   useEffect(() => {
     if (userId === null || !token) return;
+    console.log(token);
 
     setLoading(true);
     axios
       .get<{ cart?: { id: number }[] }>(
-        `https://avocado-z31n.onrender.com/api/cart/getAllCartByIsDeletedFalse/${userId}`,
+        `http://localhost:5000/api/cart/getAllCartByIsDeletedFalse/${userId}`,
         { headers: { authorization: `Bearer ${token}` } }
       )
       .then((res) => {
+        console.log(res.data);
+        
         const carts = res.data.cart ?? [];
         setCartId(carts.length > 0 ? carts[0].id : null);
         setError(null);
@@ -107,7 +110,9 @@ const ProductDetailsPage: React.FC = () => {
     setError(null);
 
     axios
-      .get<ProductDetailsProps>(`https://avocado-z31n.onrender.com/api/products/${id}`)
+      .get<ProductDetailsProps>(
+        `http://localhost:5000/api/products/${id}`
+      )
       .then((response) => {
         setProduct(response.data);
         if (response.data.size.length > 0) {
@@ -160,13 +165,14 @@ const ProductDetailsPage: React.FC = () => {
       const productId = product?.id;
 
       const response = await axios.post(
-        "https://avocado-z31n.onrender.com/api/cartProduct",
+        "http://localhost:5000/api/cartProduct",
         {
           cartId,
           productId,
           size: selectedSize, // لو الباكند يدعم الحجم أضفها
         }
       );
+console.log(response.data);
 
       if (response.data.success) {
         setModalTitle("Success");
@@ -193,7 +199,7 @@ const ProductDetailsPage: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "https://avocado-z31n.onrender.com/api/favorite",
+        "http://localhost:5000/api/favorite",
         {
           productId: product?.id,
           userId: userId,

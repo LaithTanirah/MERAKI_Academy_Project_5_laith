@@ -22,7 +22,7 @@ export default function DashboardCharts() {
 
   useEffect(() => {
     // PieChart data
-    fetch("https://avocado-z31n.onrender.com/api/dashboard/orders-status")
+    fetch("http://localhost:5000/api/dashboard/orders-status")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setPieData(data);
@@ -31,7 +31,7 @@ export default function DashboardCharts() {
       .catch(() => setPieData([]));
 
     // LineChart data
-    fetch("https://avocado-z31n.onrender.com/api/dashboard/weekly-sales")
+    fetch("http://localhost:5000/api/dashboard/weekly-sales")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setLineData(data);

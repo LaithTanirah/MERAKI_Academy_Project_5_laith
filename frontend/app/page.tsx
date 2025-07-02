@@ -48,7 +48,7 @@ export default function AuthSplitLayout() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
-  const API = process.env.NEXT_PUBLIC_API_URL || "https://avocado-z31n.onrender.com";
+  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   // دالة تغلق كل النوافذ المفتوحة
   const closeAllModals = () => {

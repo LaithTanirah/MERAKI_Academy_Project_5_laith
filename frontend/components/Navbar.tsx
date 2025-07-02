@@ -114,11 +114,11 @@ export default function Navbar() {
             </motion.div>
 
             <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
-              <img
+             {/*<img
                 src="logos/logo6.png"
                 alt="Logo"
                 style={{ width: 60, marginTop: 7 }}
-              />
+              />  */} 
               <Typography
                 variant="h5"
                 component={Link}
