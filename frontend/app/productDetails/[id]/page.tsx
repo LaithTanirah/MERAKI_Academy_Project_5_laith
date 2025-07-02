@@ -82,6 +82,7 @@ const ProductDetailsPage: React.FC = () => {
 
   useEffect(() => {
     if (userId === null || !token) return;
+    console.log(token);
 
     setLoading(true);
     axios
@@ -90,6 +91,8 @@ const ProductDetailsPage: React.FC = () => {
         { headers: { authorization: `Bearer ${token}` } }
       )
       .then((res) => {
+        console.log(res.data);
+        
         const carts = res.data.cart ?? [];
         setCartId(carts.length > 0 ? carts[0].id : null);
         setError(null);
@@ -107,7 +110,9 @@ const ProductDetailsPage: React.FC = () => {
     setError(null);
 
     axios
-      .get<ProductDetailsProps>(`http://localhost:5000/api/products/${id}`)
+      .get<ProductDetailsProps>(
+        `http://localhost:5000/api/products/${id}`
+      )
       .then((response) => {
         setProduct(response.data);
         if (response.data.size.length > 0) {
@@ -167,6 +172,7 @@ const ProductDetailsPage: React.FC = () => {
           size: selectedSize, // لو الباكند يدعم الحجم أضفها
         }
       );
+console.log(response.data);
 
       if (response.data.success) {
         setModalTitle("Success");

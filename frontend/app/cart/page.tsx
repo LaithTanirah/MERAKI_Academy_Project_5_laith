@@ -13,7 +13,6 @@ import {
   Stack,
   TextField,
   CircularProgress,
-  Grid,
   Card,
   CardMedia,
   CardContent,
@@ -24,6 +23,7 @@ import {
   DialogActions,
   Box,
 } from "@mui/material";
+import { Grid } from '@mui/material'; 
 import DeleteIcon from "@mui/icons-material/Delete";
 import dynamic from "next/dynamic";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -162,6 +162,7 @@ const ShoppingCart: React.FC = () => {
       .catch(() => setError("Failed to load cart items."))
       .finally(() => setLoading(false));
   }, [cartId, token]);
+console.log(cartProductList);
 
   const handleQuantityChange = (productId: number, qty: number) => {
     if (qty < 1) return;
@@ -290,7 +291,7 @@ const ShoppingCart: React.FC = () => {
         justifyContent="center"
         alignItems="flex-start"
       >
-        <Grid item xs={12} md={8}>
+        <Grid>
           <Stack spacing={2}>
             {cartProductList.map((prod) => {
               const item = cartItems.find((i) => i.productid === prod.id);
@@ -302,7 +303,7 @@ const ShoppingCart: React.FC = () => {
                 >
                   <CardMedia
                     component="img"
-                    image={`images/${prod.image[0]}`}
+                    image={`/images/${prod.image[0]}`}
                     alt={prod.title}
                     sx={{ width: 130, height: 130, borderRadius: 2 }}
                   />
@@ -310,7 +311,7 @@ const ShoppingCart: React.FC = () => {
                     <Typography variant="h6">{prod.title}</Typography>
                     <Typography variant="body2">Size: {prod.size}</Typography>
                     <Typography variant="subtitle1" color="primary">
-                      ${prod.price.toFixed(2)}
+                      {prod.price.toFixed(2)} JOD
                     </Typography>
                   </CardContent>
                   <CardActions sx={{ flexDirection: "column" }}>
@@ -341,7 +342,7 @@ const ShoppingCart: React.FC = () => {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid >
           <Paper sx={{ p: 3, borderRadius: 3, backgroundColor: "#F5F5F5" }}>
             <Typography variant="h6" gutterBottom>
               Order Summary
@@ -359,7 +360,7 @@ const ShoppingCart: React.FC = () => {
               )}
             </Typography>
             <Typography variant="h5" fontWeight="bold" mt={2} mb={3}>
-              Total: ${totalPrice.toFixed(2)}
+              Total: {totalPrice.toFixed(2)} JOD
             </Typography>
             {!userLocation && (
               <Button

@@ -153,7 +153,7 @@ export default function SearchPage() {
                             color: "#2e7d32",
                           }}
                         >
-                          ${product.price?.toFixed(2)}
+                          {product.price?.toFixed(2)} JOD
                         </Typography>
                       </Box>
                     </CardContent>

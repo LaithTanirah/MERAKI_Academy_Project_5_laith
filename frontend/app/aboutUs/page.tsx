@@ -22,6 +22,7 @@ import { GitHub, LinkedIn, Close } from "@mui/icons-material";
 const theme = createTheme({
   typography: { fontFamily: "'Roboto', sans-serif" },
 });
+type TeamMember = typeof teamMembers[number];
 
 const teamMembers = [
   {
@@ -91,12 +92,14 @@ const CARD = { width: 300, height: 380 };
 
 export default function AboutUs() {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
+const [selected, setSelected] = useState<TeamMember | null>(null);
 
-  const handleOpen = (member) => {
-    setSelected(member);
-    setOpen(true);
-  };
+
+const handleOpen = (member: TeamMember) => {
+  setSelected(member);
+  setOpen(true);
+};
+
 
   const handleClose = () => setOpen(false);
 
