@@ -186,4 +186,4 @@ Developed under guidance from **[MERAKI Academy](https://www.meraki-academy.org)
 
 ---
 
-**Developed by Mohammad Ali ©️ 2025**
+**Developed by Mohammad Ali & Laith tannirah & Hassan ©️ 2025**
